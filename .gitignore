@@ -38,6 +38,12 @@ wandb/
 # Hugging Face / model artifacts
 hf_cache/
 
+# Repo outputs
+artifacts/
+data/raw/generated/
+data/processed/
+data/reports/
+
 # Generated data outputs
 *_generated_*.json
 *_generated_*.jsonl

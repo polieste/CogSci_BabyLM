@@ -20,43 +20,43 @@ The overall task setup follows the BabyLM grammaticality judgment formulation:
 
 ### Data Generation
 
-- [generate_grammaticality_data_openai.py](./generate_grammaticality_data_openai.py)
+- [generate_grammaticality_data_openai.py](./src/generation/generate_grammaticality_data_openai.py)
   Generate data with OpenAI models such as `gpt-5.4-mini`
 
-- [generate_grammaticality_data_grok.py](./generate_grammaticality_data_grok.py)
+- [generate_grammaticality_data_grok.py](./src/generation/generate_grammaticality_data_grok.py)
   Generate data with xAI Grok models
 
-- [generate_grammaticality_data_gemini.py](./generate_grammaticality_data_gemini.py)
+- [generate_grammaticality_data_gemini.py](./src/generation/generate_grammaticality_data_gemini.py)
   Generate data with Gemini models
 
-- [prompt_topic_config.json](./prompt_topic_config.json)
+- [prompt_topic_config.json](./data/topics/prompt_topic_config.json)
   Central config file for prompt templates, topics, and phenomenon cards
 
-- [generation_config.py](./generation_config.py)
+- [generation_config.py](./src/generation/generation_config.py)
   Shared helper that reads `prompt_topic_config.json` and builds prompts
 
 ### Data Processing
 
-- [prepare_generated_grammar_data.py](./prepare_generated_grammar_data.py)
+- [prepare_generated_grammar_data.py](./src/postprocess/prepare_generated_grammar_data.py)
   Merge one or many generated files into a unified JSONL dataset
 
-- [validate_generated_grammar_data.py](./validate_generated_grammar_data.py)
+- [validate_generated_grammar_data.py](./src/postprocess/validate_generated_grammar_data.py)
   Validate, clean, deduplicate, and export train-ready JSONL
 
 ### EDA
-- [train_ready_grammar_data_eda.ipynb](./train_ready_grammar_data_eda.ipynb)
+- [train_ready_grammar_data_eda.ipynb](./notebooks/eda/train_ready_grammar_data_eda.ipynb)
   Explore the final cleaned training file
 
-- [Language_acquisition.ipynb](./Language_acquisition.ipynb)
+- [Language_acquisition.ipynb](./notebooks/benchmark/Language_acquisition.ipynb)
   Base BLiMP benchmark notebook and official word-count method
 
 ### Training and Evaluation
 
-- [train_babyllama_grammar.py](./train_babyllama_grammar.py)
+- [train_babyllama_grammar.py](./src/training/train_babyllama_grammar.py)
   Fine-tune a causal LM on `good` vs `bad` grammaticality pairs
 
-- [evaluate_finetuned_babyllama.py](./evaluate_finetuned_babyllama.py)
-  Evaluate a fine-tuned model on `blimp_validation.json`
+- [evaluate_finetuned_babyllama.py](./src/training/evaluate_finetuned_babyllama.py)
+  Evaluate a fine-tuned model on `data/blimp/blimp_validation.json`
 
 
 ## Installation
@@ -112,19 +112,19 @@ Examples:
 ### OpenAI
 
 ```powershell
-python generate_grammaticality_data_openai.py --prompt-id prompt_1 --phenomenon binding --count 20
+python src/generation/generate_grammaticality_data_openai.py --prompt-id prompt_1 --phenomenon binding --count 20
 ```
 
 ### Grok
 
 ```powershell
-python generate_grammaticality_data_grok.py --prompt-id prompt_2 --phenomenon anaphor_agreement --count 15 --topics family_home,school_classroom
+python src/generation/generate_grammaticality_data_grok.py --prompt-id prompt_2 --phenomenon anaphor_agreement --count 15 --topics family_home,school_classroom
 ```
 
 ### Gemini
 
 ```powershell
-python generate_grammaticality_data_gemini.py --prompt-id prompt_3 --phenomenon ellipsis --count 10
+python src/generation/generate_grammaticality_data_gemini.py --prompt-id prompt_3 --phenomenon ellipsis --count 10
 ```
 
 Generated records follow the config schema:
@@ -142,7 +142,7 @@ Generated records follow the config schema:
 
 ## Stage 2: Merge Generated Files
 
-Use [prepare_generated_grammar_data.py](./prepare_generated_grammar_data.py) to combine many generated files into one normalized JSONL dataset.
+Use [prepare_generated_grammar_data.py](./src/postprocess/prepare_generated_grammar_data.py) to combine many generated files into one normalized JSONL dataset.
 
 It accepts:
 
@@ -173,13 +173,13 @@ Output schema:
 Example:
 
 ```powershell
-python prepare_generated_grammar_data.py . --output final_generated_grammar_data.jsonl
+python src/postprocess/prepare_generated_grammar_data.py data/raw/generated --output data/processed/final_generated_grammar_data.jsonl
 ```
 
 
 ## Stage 3: Validate and Clean the Data
 
-Use [validate_generated_grammar_data.py](./validate_generated_grammar_data.py) on the merged JSONL file.
+Use [validate_generated_grammar_data.py](./src/postprocess/validate_generated_grammar_data.py) on the merged JSONL file.
 
 It will:
 
@@ -196,15 +196,15 @@ It will:
 Example:
 
 ```powershell
-python validate_generated_grammar_data.py final_generated_grammar_data.jsonl
+python src/postprocess/validate_generated_grammar_data.py data/processed/final_generated_grammar_data.jsonl
 ```
 
 Default outputs:
 
-- `train_ready_grammar_data.jsonl`
-- `invalid_generated_grammar_data.jsonl`
-- `duplicate_generated_grammar_data.jsonl`
-- `generated_grammar_data_report.json`
+- `data/processed/train_ready_grammar_data.jsonl`
+- `data/processed/invalid_generated_grammar_data.jsonl`
+- `data/processed/duplicate_generated_grammar_data.jsonl`
+- `data/reports/generated_grammar_data_report.json`
 
 
 ## Stage 4: EDA
@@ -212,7 +212,7 @@ Default outputs:
 
 Open:
 
-- [train_ready_grammar_data_eda.ipynb](./train_ready_grammar_data_eda.ipynb)
+- [train_ready_grammar_data_eda.ipynb](./notebooks/eda/train_ready_grammar_data_eda.ipynb)
 
 This notebook focuses on:
 
@@ -224,7 +224,7 @@ This notebook focuses on:
 
 ## Stage 5: Train a Model
 
-Use [train_babyllama_grammar.py](./train_babyllama_grammar.py).
+Use [train_babyllama_grammar.py](./src/training/train_babyllama_grammar.py).
 
 This script:
 
@@ -246,19 +246,19 @@ Supported models include:
 ### Train BabyLLaMA
 
 ```powershell
-python train_babyllama_grammar.py --model-name babylm/babyllama-100m-2024 --train-file train_ready_grammar_data.jsonl --output-dir babyllama_grammar_ft
+python src/training/train_babyllama_grammar.py --model-name babylm/babyllama-100m-2024 --train-file data/processed/train_ready_grammar_data.jsonl --output-dir artifacts/models/babyllama_grammar_ft
 ```
 
 ### Train GPT-BERT 100M Causal Focus
 
 ```powershell
-python train_babyllama_grammar.py --model-name BabyLM-community/babylm-baseline-100m-gpt-bert-causal-focus --trust-remote-code --train-file train_ready_grammar_data.jsonl --output-dir gptbert_100m_grammar_ft
+python src/training/train_babyllama_grammar.py --model-name BabyLM-community/babylm-baseline-100m-gpt-bert-causal-focus --trust-remote-code --train-file data/processed/train_ready_grammar_data.jsonl --output-dir artifacts/models/gptbert_100m_grammar_ft
 ```
 
 ### Train GPT-BERT 10M Causal Focus
 
 ```powershell
-python train_babyllama_grammar.py --model-name BabyLM-community/babylm-baseline-10m-gpt-bert-causal-focus --trust-remote-code --train-file train_ready_grammar_data.jsonl --output-dir gptbert_10m_grammar_ft
+python src/training/train_babyllama_grammar.py --model-name BabyLM-community/babylm-baseline-10m-gpt-bert-causal-focus --trust-remote-code --train-file data/processed/train_ready_grammar_data.jsonl --output-dir artifacts/models/gptbert_10m_grammar_ft
 ```
 
 Useful arguments:
@@ -280,12 +280,12 @@ Outputs:
 
 ## Stage 6: Evaluate on BLiMP
 
-Use [evaluate_finetuned_babyllama.py](./evaluate_finetuned_babyllama.py).
+Use [evaluate_finetuned_babyllama.py](./src/training/evaluate_finetuned_babyllama.py).
 
 This script:
 
 - loads the fine-tuned model
-- evaluates on `blimp_validation.json`
+- evaluates on `data/blimp/blimp_validation.json`
 - uses the same probability comparison rule as the benchmark:
   - choose the sentence with the higher sentence log probability
 - can optionally compare against the original base model
@@ -293,18 +293,18 @@ This script:
 ### Evaluate a Fine-Tuned BabyLLaMA Model
 
 ```powershell
-python evaluate_finetuned_babyllama.py --model-dir babyllama_grammar_ft --compare-base
+python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_grammar_ft --compare-base
 ```
 
 ### Evaluate a Fine-Tuned GPT-BERT Model
 
 ```powershell
-python evaluate_finetuned_babyllama.py --model-dir gptbert_100m_grammar_ft --compare-base --base-model-name BabyLM-community/babylm-baseline-100m-gpt-bert-causal-focus --trust-remote-code
+python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/gptbert_100m_grammar_ft --compare-base --base-model-name BabyLM-community/babylm-baseline-100m-gpt-bert-causal-focus --trust-remote-code
 ```
 
 Output:
 
-- `finetuned_babylm_benchmark_results.json`
+- `data/reports/finetuned_babylm_benchmark_results.json`
 
 
 ## Example End-to-End Pipeline
@@ -312,37 +312,37 @@ Output:
 ### 1. Generate data
 
 ```powershell
-python generate_grammaticality_data_gemini.py --prompt-id prompt_3 --phenomenon anaphor_agreement --topics family_home --count 50
+python src/generation/generate_grammaticality_data_gemini.py --prompt-id prompt_3 --phenomenon anaphor_agreement --topics family_home --count 50
 ```
 
 ### 2. Merge all generated files
 
 ```powershell
-python prepare_generated_grammar_data.py . --output final_generated_grammar_data.jsonl
+python src/postprocess/prepare_generated_grammar_data.py data/raw/generated --output data/processed/final_generated_grammar_data.jsonl
 ```
 
 ### 3. Validate and clean
 
 ```powershell
-python validate_generated_grammar_data.py final_generated_grammar_data.jsonl
+python src/postprocess/validate_generated_grammar_data.py data/processed/final_generated_grammar_data.jsonl
 ```
 
 ### 4. Inspect the final dataset
 
 Open:
 
-- [train_ready_grammar_data_eda.ipynb](./train_ready_grammar_data_eda.ipynb)
+- [train_ready_grammar_data_eda.ipynb](./notebooks/eda/train_ready_grammar_data_eda.ipynb)
 
 ### 5. Fine-tune
 
 ```powershell
-python train_babyllama_grammar.py --model-name babylm/babyllama-100m-2024 --train-file train_ready_grammar_data.jsonl --output-dir babyllama_grammar_ft
+python src/training/train_babyllama_grammar.py --model-name babylm/babyllama-100m-2024 --train-file data/processed/train_ready_grammar_data.jsonl --output-dir artifacts/models/babyllama_grammar_ft
 ```
 
 ### 6. Evaluate
 
 ```powershell
-python evaluate_finetuned_babyllama.py --model-dir babyllama_grammar_ft --compare-base
+python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_grammar_ft --compare-base
 ```
 
 

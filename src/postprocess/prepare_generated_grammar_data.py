@@ -130,6 +130,7 @@ def collect_input_files(input_paths: list[str]) -> list[Path]:
 
 
 def write_jsonl(records: list[dict], output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as f:
         for record in records:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -147,7 +148,7 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("final_generated_grammar_data.jsonl"),
+        default=Path("data/processed/final_generated_grammar_data.jsonl"),
         help="Path to the merged JSONL output file.",
     )
     args = parser.parse_args()
@@ -166,3 +167,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

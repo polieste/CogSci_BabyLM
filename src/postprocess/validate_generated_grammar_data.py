@@ -31,6 +31,7 @@ def load_jsonl(path: Path) -> list[dict]:
 
 
 def write_jsonl(records: list[dict], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         for record in records:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -107,25 +108,25 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("train_ready_grammar_data.jsonl"),
+        default=Path("data/processed/train_ready_grammar_data.jsonl"),
         help="Path to the cleaned training-ready JSONL file.",
     )
     parser.add_argument(
         "--invalid-output",
         type=Path,
-        default=Path("invalid_generated_grammar_data.jsonl"),
+        default=Path("data/processed/invalid_generated_grammar_data.jsonl"),
         help="Path to save invalid records with issue labels.",
     )
     parser.add_argument(
         "--duplicates-output",
         type=Path,
-        default=Path("duplicate_generated_grammar_data.jsonl"),
+        default=Path("data/processed/duplicate_generated_grammar_data.jsonl"),
         help="Path to save removed duplicate records.",
     )
     parser.add_argument(
         "--report-output",
         type=Path,
-        default=Path("generated_grammar_data_report.json"),
+        default=Path("data/reports/generated_grammar_data_report.json"),
         help="Path to save a validation summary report.",
     )
     args = parser.parse_args()
@@ -162,6 +163,7 @@ def main() -> None:
         "invalid_issue_breakdown": dict(issue_counter),
     }
 
+    args.report_output.parent.mkdir(parents=True, exist_ok=True)
     args.report_output.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
     print(f"Total records: {len(records)}")
@@ -176,3 +178,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+
+

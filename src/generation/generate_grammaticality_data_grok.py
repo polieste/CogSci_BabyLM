@@ -4,11 +4,11 @@ import os
 from pathlib import Path
 from datetime import datetime
 
+import httpx
 from openai import OpenAI
 from generation_config import (
     DEFAULT_CONFIG_PATH,
     build_prompt,
-    get_response_item_schema,
     load_generation_config,
     parse_topics_arg,
 )
@@ -24,59 +24,59 @@ def load_env_file(env_path: Path = Path(".env")) -> None:
             continue
 
         key, value = line.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        os.environ.setdefault(key, value)
 
 
 def build_client() -> OpenAI:
     load_env_file()
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("XAI_API_KEY")
     if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not set.")
-    return OpenAI(api_key=api_key)
+        raise RuntimeError("XAI_API_KEY is not set in the environment or .env.")
+
+    return OpenAI(
+        api_key=api_key,
+        base_url="https://api.x.ai/v1",
+        timeout=httpx.Timeout(3600.0),
+    )
 
 
-def request_items(client: OpenAI, model: str, prompt: str, count: int) -> list[dict]:
+def parse_jsonl_output(text: str) -> list[dict]:
+    cleaned = text.strip()
+
+    if cleaned.startswith("```"):
+        parts = cleaned.split("```")
+        cleaned = "".join(part for part in parts if "json" not in part.lower()).strip()
+
+    items = []
+    for line in cleaned.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        items.append(json.loads(line))
+
+    return items
+
+
+def request_items(client: OpenAI, model: str, prompt: str) -> list[dict]:
     response = client.responses.create(
         model=model,
         input=[
             {
                 "role": "user",
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": prompt,
-                    }
-                ],
+                "content": prompt,
             }
         ],
-        reasoning={"effort": "low"},
-        text={
-            "format": {
-                "type": "json_schema",
-                "name": "grammaticality_items",
-                "strict": True,
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "items": {
-                            "type": "array",
-                            "minItems": count,
-                            "maxItems": count,
-                            "items": get_response_item_schema(),
-                        }
-                    },
-                    "required": ["items"],
-                    "additionalProperties": False,
-                },
-            }
-        },
+        store=False,
     )
 
-    payload = json.loads(response.output_text)
-    return payload["items"]
+    items = parse_jsonl_output(response.output_text)
+    return items
 
 
 def write_jsonl(items: list[dict], output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as f:
         for item in items:
             f.write(json.dumps(item, ensure_ascii=False) + "\n")
@@ -97,12 +97,12 @@ def build_default_output_path(provider: str, prompt_id: str, phenomenon: str, to
         f"{make_safe_filename_part(topic_label)}_"
         f"{timestamp}.json"
     )
-    return Path(filename)
+    return Path("data/raw/generated") / filename
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate grammaticality judgment minimal pairs with the OpenAI API."
+        description="Generate grammaticality judgment minimal pairs with Grok."
     )
     parser.add_argument(
         "--config",
@@ -112,8 +112,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--model",
-        default="gpt-5.4-mini",
-        help="OpenAI model name to use.",
+        default="grok-4.20-0309-non-reasoning",
+        help="xAI model name to use.",
     )
     parser.add_argument(
         "--phenomenon",
@@ -156,12 +156,12 @@ def main() -> None:
 
     client = build_client()
     output_path = args.output or build_default_output_path(
-        provider="openai",
+        provider="grok",
         prompt_id=args.prompt_id,
         phenomenon=args.phenomenon,
         topics=allowed_topics,
     )
-    items = request_items(client, args.model, prompt, args.count)
+    items = request_items(client, args.model, prompt)
     write_jsonl(items, output_path)
 
     print(f"Prompt id: {args.prompt_id}")

@@ -2,7 +2,8 @@ import json
 from pathlib import Path
 
 
-DEFAULT_CONFIG_PATH = Path("prompt_topic_config.json")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_CONFIG_PATH = REPO_ROOT / "data" / "topics" / "prompt_topic_config.json"
 
 
 def load_generation_config(config_path: Path | str = DEFAULT_CONFIG_PATH) -> dict:
@@ -116,3 +117,4 @@ def get_response_item_schema() -> dict:
         "required": ["phenomenon", "topic", "good", "bad", "edit_type"],
         "additionalProperties": False,
     }
+

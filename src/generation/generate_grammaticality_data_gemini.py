@@ -4,15 +4,22 @@ import os
 from pathlib import Path
 from datetime import datetime
 
-import httpx
-from openai import OpenAI
+try:
+    from google import genai
+    from google.genai import types
+except ImportError as exc:
+    raise ImportError(
+        "Missing dependency `google-genai`. Install it with `pip install google-genai` "
+        "or `pip install -r requirements.txt`."
+    ) from exc
+
 from generation_config import (
     DEFAULT_CONFIG_PATH,
     build_prompt,
+    get_response_item_schema,
     load_generation_config,
     parse_topics_arg,
 )
-
 
 def load_env_file(env_path: Path = Path(".env")) -> None:
     if not env_path.exists():
@@ -29,53 +36,45 @@ def load_env_file(env_path: Path = Path(".env")) -> None:
         os.environ.setdefault(key, value)
 
 
-def build_client() -> OpenAI:
+def build_client() -> genai.Client:
     load_env_file()
-    api_key = os.getenv("XAI_API_KEY")
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise RuntimeError("XAI_API_KEY is not set in the environment or .env.")
+        raise RuntimeError("GEMINI_API_KEY is not set in the environment or .env.")
 
-    return OpenAI(
-        api_key=api_key,
-        base_url="https://api.x.ai/v1",
-        timeout=httpx.Timeout(3600.0),
-    )
+    return genai.Client(api_key=api_key)
 
 
 def parse_jsonl_output(text: str) -> list[dict]:
-    cleaned = text.strip()
-
-    if cleaned.startswith("```"):
-        parts = cleaned.split("```")
-        cleaned = "".join(part for part in parts if "json" not in part.lower()).strip()
-
-    items = []
-    for line in cleaned.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        items.append(json.loads(line))
-
-    return items
+    payload = json.loads(text)
+    if isinstance(payload, list):
+        return payload
+    if isinstance(payload, dict) and "items" in payload:
+        return payload["items"]
+    raise ValueError("Gemini response did not match the expected JSON schema.")
 
 
-def request_items(client: OpenAI, model: str, prompt: str) -> list[dict]:
-    response = client.responses.create(
+def request_items(client: genai.Client, model: str, prompt: str, count: int) -> list[dict]:
+    response = client.models.generate_content(
         model=model,
-        input=[
-            {
-                "role": "user",
-                "content": prompt,
-            }
-        ],
-        store=False,
+        contents=prompt,
+        config={
+            "system_instruction": f"Return exactly {count} items as structured JSON with no extra commentary.",
+            "thinking_config": types.ThinkingConfig(thinking_level="low"),
+            "response_mime_type": "application/json",
+            "response_json_schema": {
+                "type": "array",
+                "minItems": count,
+                "maxItems": count,
+                "items": get_response_item_schema(),
+            },
+        },
     )
-
-    items = parse_jsonl_output(response.output_text)
-    return items
+    return parse_jsonl_output(response.text)
 
 
 def write_jsonl(items: list[dict], output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as f:
         for item in items:
             f.write(json.dumps(item, ensure_ascii=False) + "\n")
@@ -96,12 +95,12 @@ def build_default_output_path(provider: str, prompt_id: str, phenomenon: str, to
         f"{make_safe_filename_part(topic_label)}_"
         f"{timestamp}.json"
     )
-    return Path(filename)
+    return Path("data/raw/generated") / filename
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate grammaticality judgment minimal pairs with Grok."
+        description="Generate grammaticality judgment minimal pairs with the Gemini API."
     )
     parser.add_argument(
         "--config",
@@ -111,8 +110,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--model",
-        default="grok-4.20-0309-non-reasoning",
-        help="xAI model name to use.",
+        default="gemini-3.1-flash-lite-preview",
+        help="Gemini model name to use.",
     )
     parser.add_argument(
         "--phenomenon",
@@ -155,12 +154,12 @@ def main() -> None:
 
     client = build_client()
     output_path = args.output or build_default_output_path(
-        provider="grok",
+        provider="gemini",
         prompt_id=args.prompt_id,
         phenomenon=args.phenomenon,
         topics=allowed_topics,
     )
-    items = request_items(client, args.model, prompt)
+    items = request_items(client, args.model, prompt, args.count)
     write_jsonl(items, output_path)
 
     print(f"Prompt id: {args.prompt_id}")

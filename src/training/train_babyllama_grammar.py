@@ -326,19 +326,19 @@ def main() -> None:
     parser.add_argument(
         "--train-file",
         type=Path,
-        default=Path("train_ready_grammar_data.jsonl"),
+        default=Path("data/processed/train_ready_grammar_data.jsonl"),
         help="Training JSONL file produced by validate_generated_grammar_data.py",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("babyllama_grammar_ft"),
+        default=Path("artifacts/models/babyllama_grammar_ft"),
         help="Directory to save the best fine-tuned model and tokenizer.",
     )
     parser.add_argument(
         "--report-file",
         type=Path,
-        default=Path("babyllama_grammar_ft_report.json"),
+        default=Path("data/reports/babyllama_grammar_ft_report.json"),
         help="Path to save the training report JSON.",
     )
     parser.add_argument(
@@ -451,6 +451,7 @@ def main() -> None:
         **training_stats,
         **history,
     }
+    args.report_file.parent.mkdir(parents=True, exist_ok=True)
     args.report_file.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
     print("Training finished.")
@@ -464,3 +465,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+
+

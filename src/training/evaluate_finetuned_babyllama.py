@@ -99,7 +99,7 @@ def main() -> None:
     parser.add_argument(
         "--dataset",
         type=Path,
-        default=Path("blimp_validation.json"),
+        default=Path("data/blimp/blimp_validation.json"),
         help="Path to the BLiMP validation JSON file.",
     )
     parser.add_argument(
@@ -111,7 +111,7 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("finetuned_babylm_benchmark_results.json"),
+        default=Path("data/reports/finetuned_babylm_benchmark_results.json"),
         help="Path to save the evaluation results.",
     )
     parser.add_argument(
@@ -161,6 +161,7 @@ def main() -> None:
             finetuned_results["overall_accuracy"] - base_results["overall_accuracy"]
         )
 
+    args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(results, indent=2), encoding="utf-8")
 
     print(f"Finetuned overall accuracy: {finetuned_results['overall_accuracy']:.4f}")
@@ -172,3 +173,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
