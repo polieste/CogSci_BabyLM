@@ -336,13 +336,13 @@ Open:
 ### 5. Fine-tune
 
 ```powershell
-python src/training/train_babyllama_grammar.py --model-name babylm/babyllama-100m-2024 --train-file data/processed/train_ready_grammar_data.jsonl --output-dir artifacts/models/babyllama_grammar_ft
+python src/training/train_babyllama_grammar.py --model-name babylm/babyllama-100m-2024 --train-file data/processed/train_ready_grammar_data.jsonl --output-dir artifacts/models/babyllama_grammar_ft --trust-remote-code
 ```
 
 ### 6. Evaluate
 
 ```powershell
-python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_grammar_ft --compare-base
+python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_grammar_ft --compare-base --trust-remote-code
 ```
 
 

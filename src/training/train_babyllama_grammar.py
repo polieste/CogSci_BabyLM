@@ -1,5 +1,6 @@
 import argparse
 import copy
+import inspect
 import json
 import random
 from pathlib import Path
@@ -11,9 +12,72 @@ from nltk.tokenize import word_tokenize
 from torch.optim import AdamW
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers.modeling_utils import PreTrainedModel
 
 
 DEFAULT_MODEL_NAME = "babylm/babyllama-100m-2024"
+
+
+def build_model_run_name(model_name: str, run_id: str | None = None) -> str:
+    model_key = model_name.lower()
+    if model_key == "babylm/babyllama-100m-2024":
+        base_name = "babyllama_2024"
+    elif model_key == "babylm-community/babylm-baseline-100m-gpt-bert-causal-focus":
+        base_name = "babyllama_gpt_bert_100m"
+    elif model_key == "babylm-community/babylm-baseline-10m-gpt-bert-causal-focus":
+        base_name = "babyllama_gpt_bert_10m"
+    else:
+        slug = model_name.split("/")[-1].lower()
+        for src, dst in [("-", "_"), (" ", "_"), (".", "_")]:
+            slug = slug.replace(src, dst)
+        base_name = slug
+
+    if run_id:
+        return f"{base_name}_{run_id}"
+    return base_name
+
+
+def _install_tied_weights_compat_shim() -> None:
+    if hasattr(PreTrainedModel, "all_tied_weights_keys"):
+        return
+
+    def _get_all_tied_weights_keys(self):
+        tied = getattr(self, "_tied_weights_keys", None)
+        if tied is None:
+            return {}
+        if isinstance(tied, dict):
+            return tied
+        return {key: [key] for key in tied}
+
+    def _set_all_tied_weights_keys(self, value):
+        self.__dict__["all_tied_weights_keys"] = value
+
+    PreTrainedModel.all_tied_weights_keys = property(
+        _get_all_tied_weights_keys,
+        _set_all_tied_weights_keys,
+    )
+
+
+_install_tied_weights_compat_shim()
+
+
+def _install_json_dtype_compat_shim() -> None:
+    original_default = json.JSONEncoder.default
+    if getattr(json.JSONEncoder, "_codex_dtype_compat", False):
+        return
+
+    def _default(self, obj):
+        if isinstance(obj, torch.dtype):
+            return str(obj)
+        if obj.__class__.__name__ == "dtype":
+            return str(obj)
+        return original_default(self, obj)
+
+    json.JSONEncoder.default = _default
+    json.JSONEncoder._codex_dtype_compat = True
+
+
+_install_json_dtype_compat_shim()
 
 
 def ensure_nltk_tokenizer() -> None:
@@ -103,6 +167,16 @@ def load_model_and_tokenizer(model_name: str, device: str, trust_remote_code: bo
     return model, tokenizer
 
 
+def _extract_logits(outputs):
+    if hasattr(outputs, "logits"):
+        return outputs.logits
+    if isinstance(outputs, dict) and "logits" in outputs:
+        return outputs["logits"]
+    if isinstance(outputs, (tuple, list)) and len(outputs) > 0:
+        return outputs[0]
+    raise TypeError(f"Unsupported model output type for logits extraction: {type(outputs)!r}")
+
+
 def sentence_log_probabilities(model, tokenizer, texts: list[str], device: str) -> torch.Tensor:
     encoded = tokenizer(
         texts,
@@ -114,7 +188,7 @@ def sentence_log_probabilities(model, tokenizer, texts: list[str], device: str) 
     attention_mask = encoded["attention_mask"].to(device)
 
     outputs = model(input_ids=input_ids, attention_mask=attention_mask)
-    logits = outputs.logits[:, :-1, :]
+    logits = _extract_logits(outputs)[:, :-1, :]
     target_ids = input_ids[:, 1:]
     target_mask = attention_mask[:, 1:]
 
@@ -193,9 +267,61 @@ def compute_training_stats(train_records: list[dict], valid_records: list[dict],
     }
 
 
+def _install_config_save_compat_shim(config) -> None:
+    config_cls = config.__class__
+    to_json_file = getattr(config_cls, "to_json_file", None)
+    if to_json_file is None:
+        return
+
+    try:
+        signature = inspect.signature(to_json_file)
+    except (TypeError, ValueError):
+        return
+
+    if "use_diff" in signature.parameters:
+        return
+
+    if getattr(config_cls, "_codex_to_json_file_compat", False):
+        if "to_json_file" in config.__dict__:
+            del config.__dict__["to_json_file"]
+        return
+
+    original_to_json_file = to_json_file
+
+    def _wrapped_to_json_file(self, json_file_path, use_diff=True):
+        return original_to_json_file(self, json_file_path)
+
+    config_cls.to_json_file = _wrapped_to_json_file
+    config_cls._codex_to_json_file_compat = True
+
+    if "to_json_file" in config.__dict__:
+        del config.__dict__["to_json_file"]
+
+
+def _clone_shared_tensors_in_state_dict(state_dict: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
+    cloned_state_dict = {}
+    seen_storage = {}
+
+    for name, tensor in state_dict.items():
+        if not isinstance(tensor, torch.Tensor):
+            cloned_state_dict[name] = tensor
+            continue
+
+        storage_id = (tensor.device.type, tensor.untyped_storage().data_ptr(), tensor.storage_offset(), tuple(tensor.size()), tuple(tensor.stride()))
+        if storage_id in seen_storage:
+            cloned_state_dict[name] = tensor.clone()
+        else:
+            cloned_state_dict[name] = tensor
+            seen_storage[storage_id] = name
+
+    return cloned_state_dict
+
+
 def save_checkpoint(model, tokenizer, output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
-    model.save_pretrained(output_dir)
+    _install_config_save_compat_shim(model.config)
+    state_dict = _clone_shared_tensors_in_state_dict(model.state_dict())
+    model.save_pretrained(output_dir, state_dict=state_dict)
     tokenizer.save_pretrained(output_dir)
 
 
@@ -332,13 +458,13 @@ def main() -> None:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("artifacts/models/babyllama_grammar_ft"),
+        default=None,
         help="Directory to save the best fine-tuned model and tokenizer.",
     )
     parser.add_argument(
         "--report-file",
         type=Path,
-        default=Path("data/reports/babyllama_grammar_ft_report.json"),
+        default=None,
         help="Path to save the training report JSON.",
     )
     parser.add_argument(
@@ -389,6 +515,11 @@ def main() -> None:
         help="Skip before/after pair-accuracy evaluation.",
     )
     parser.add_argument(
+        "--run-id",
+        default="id",
+        help="Suffix used in saved model/report names to distinguish runs.",
+    )
+    parser.add_argument(
         "--trust-remote-code",
         action="store_true",
         help="Enable Hugging Face trust_remote_code for custom architectures such as GPT-BERT baselines.",
@@ -401,6 +532,11 @@ def main() -> None:
         torch.cuda.manual_seed_all(args.seed)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    run_name = build_model_run_name(args.model_name, args.run_id)
+    if args.output_dir is None:
+        args.output_dir = Path("artifacts/models") / run_name
+    if args.report_file is None:
+        args.report_file = Path("data/reports") / f"{run_name}_report.json"
     all_records = load_jsonl(args.train_file)
     if len(all_records) < 2:
         raise ValueError("Need at least 2 records to create train/validation splits.")
