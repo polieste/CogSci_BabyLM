@@ -1,0 +1,1328 @@
+{
+  "version": "1.0",
+  "schema": {
+    "phenomenon": "",
+    "topic": "",
+    "good": "",
+    "bad": "",
+    "edit_type": ""
+  },
+  "prompts": {
+    "prompt_1": {
+      "name": "direct_minimal_pair_generator",
+      "topic_source": "all_topics_pool",
+      "topic_policy": "Select exactly one topic from all_topics_pool for each item.",
+      "template": {
+        "name": "Direct minimal-pair generator",
+        "prompt": "You are creating NEW English minimal pairs for grammaticality-judgment training.\n\nGenerate {{N}} items.\n\nPhenomena:\n{{PHENOMENA}}\n\nAllowed topic labels:\n{{TOPIC_LIST}}\n\nTopic policy:\n- Each item must choose exactly one topic label from the allowed topic list.\n- Write that label in the \"topic\" field exactly as given.\n- The topic controls only the content domain and vocabulary.\n- The grammatical contrast must be determined only by \"phenomenon\", not by \"topic\".\n- If no topic distribution is provided, balance topics approximately evenly.\n\nOutput format:\nReturn JSONL only, one object per line, no markdown, no commentary.\nRequired keys:\n{\"phenomenon\":\"\",\"topic\":\"\",\"good\":\"\",\"bad\":\"\",\"edit_type\":\"\"}\n\nRules:\n1. Each item must contain one grammatical sentence in \"good\" and one ungrammatical sentence in \"bad\".\n2. The two sentences should differ by one minimal grammatical edit whenever possible.\n3. Keep meaning, tense, punctuation, capitalization, and most lexical material the same.\n4. Keep word count equal whenever possible; otherwise keep the difference as small as possible.\n5. The bad sentence must be ungrammatical, not merely odd, implausible, or stylistically unusual.\n6. No typos, spelling mistakes, random deletions, or punctuation-only differences.\n7. Use natural Standard English and mostly everyday vocabulary.\n8. Most sentences should be 6 to 14 words long unless the phenomenon naturally needs a longer dependency.\n9. Vary names, nouns, and verbs; avoid duplicates and near-duplicates.\n10. Use \"edit_type\" to describe the specific contrast precisely.\n- Example edit_type values include:\n  number_agreement\n  determiner_number_match\n  reflexive_number_match\n  unlicensed_reflexive\n  missing_required_complement\n  one_anaphora_modifier_position\n  resumptive_pronoun\n  irregular_participle\n  left_branch_extraction\n  npi_licensing\n  existential_there_quantifier\n\nBefore outputting each item, silently verify that:\n- good is grammatical,\n- bad is ungrammatical for one primary reason,\n- the phenomenon label is correct,\n- the topic label fits the content domain.\n\nReturn exactly {{N}} JSON lines."
+      }
+    },
+    "prompt_2": {
+      "name": "caregiver_recast_generator",
+      "topic_source": "all_topics_pool",
+      "topic_policy": "Select exactly one topic from all_topics_pool for each item.",
+      "template": {
+        "name": "Caregiver recast / developmental style",
+        "prompt": "You are simulating a caregiver who immediately recasts a learner's ungrammatical English sentence into a grammatical adult form.\n\nGenerate {{N}} NEW learner-caregiver pairs.\n\nPhenomena:\n{{PHENOMENA}}\n\nAllowed topic labels:\n{{TOPIC_LIST}}\n\nTopic policy:\n- Each item must choose exactly one topic label from the allowed topic list.\n- Write that label in the \"topic\" field exactly as given.\n- The topic controls only the content domain and vocabulary.\n- The grammatical contrast must be determined only by \"phenomenon\", not by \"topic\".\n- If no topic distribution is provided, balance topics approximately evenly.\n\nOutput format:\nReturn JSONL only, one object per line, no markdown, no commentary.\nRequired keys:\n{\"phenomenon\":\"\",\"topic\":\"\",\"bad\":\"\",\"good\":\"\",\"edit_type\":\"\"}\n\nRules:\n1. \"bad\" is the learner utterance and must contain exactly one main grammatical error.\n2. \"good\" is the caregiver recast and must fix that error with the minimum possible edit.\n3. Keep meaning unchanged.\n4. Do not add praise, explanations, dialogue, or extra context.\n5. Errors must be morphosyntactic or tightly grammar-related, not spelling mistakes or random word omissions.\n6. Keep the two sentences as similar as possible.\n7. Keep word count equal whenever possible; otherwise keep the difference as small as possible.\n8. Use natural Standard English and everyday vocabulary.\n9. Avoid duplicates and near-duplicates.\n10. Use \"edit_type\" to describe the specific contrast precisely.\n\nBefore outputting each item, silently verify that:\n- bad has one primary grammatical error,\n- good is a minimal recast,\n- the phenomenon label is correct,\n- the topic label matches the content domain.\n\nReturn exactly {{N}} JSON lines."
+      }
+    },
+    "prompt_3": {
+      "name": "fewshot_phenomenon_card_generator",
+      "topic_source": "recommended_pairings_for_each_phenomenon",
+      "topic_policy": "For each phenomenon card, choose topics only from the recommended topic pairings of that phenomenon.",
+      "template": {
+        "name": "Few-shot phenomenon-card generator",
+        "prompt": "You are generating NEW English minimal pairs for ONE grammatical phenomenon.\n\nUse the phenomenon card below as abstract guidance only.\nThe seeds are self-authored examples, not benchmark data.\nDo not copy the wording, names, or exact sentence frames from the seeds.\n\nGenerate {{N}} items.\n\nPhenomenon card:\n{{PHENOMENON_CARD}}\n\nAllowed topic labels:\n{{TOPIC_LIST}}\n\nTopic policy:\n- Each item must choose exactly one topic label from the allowed topic list.\n- Write that label in the \"topic\" field exactly as given.\n- The topic controls only the content domain and vocabulary.\n- The grammatical contrast must be determined only by the phenomenon in the card, not by topic.\n- If the allowed topic list contains only one item, use that topic for every output line.\n\nOutput format:\nReturn JSONL only, one object per line, no markdown, no commentary.\nRequired keys:\n{\"phenomenon\":\"\",\"topic\":\"\",\"good\":\"\",\"bad\":\"\",\"edit_type\":\"\"}\n\nRules:\n1. Every item must belong to the phenomenon in the card.\n2. Each pair must contrast one grammatical sentence and one ungrammatical sentence.\n3. Prefer one minimal grammatical edit per pair.\n4. Keep meaning, tense, punctuation, capitalization, and most lexical material the same.\n5. Keep word count equal whenever possible; otherwise keep the difference as small as possible.\n6. Use natural Standard English.\n7. Avoid duplicates and near-duplicates.\n8. Do not reproduce any known benchmark examples.\n9. Do not repeat the seed names, nouns, verbs, or exact syntactic frames.\n- Use \"edit_type\" to record the exact local contrast.\n\nBefore outputting each item, silently verify that:\n- good is grammatical,\n- bad is ungrammatical for one primary reason,\n- the phenomenon label is correct,\n- the topic label matches the content domain.\n\nReturn exactly {{N}} JSON lines."
+      }
+    }
+  },
+  "phenomenon_cards": [
+    {
+      "name": "anaphor_agreement",
+      "definition": "A reflexive form such as himself, herself, themselves, or itself must match its antecedent in person, number, gender, or animacy.",
+      "good_topics": [
+        "family_home",
+        "school_classroom",
+        "neighborhood_community",
+        "household_objects"
+      ],
+      "common_edit_types": [
+        "reflexive_number_match",
+        "reflexive_gender_match",
+        "reflexive_animacy_match"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "anaphor_agreement",
+          "topic": "family_home",
+          "good": "The girls blamed themselves for the noise.",
+          "bad": "The girls blamed herself for the noise.",
+          "edit_type": "reflexive_number_match"
+        },
+        {
+          "phenomenon": "anaphor_agreement",
+          "topic": "school_classroom",
+          "good": "Maya prepared herself for the recital.",
+          "bad": "Maya prepared themselves for the recital.",
+          "edit_type": "reflexive_number_match"
+        },
+        {
+          "phenomenon": "anaphor_agreement",
+          "topic": "household_objects",
+          "good": "The machine shut itself down after the test.",
+          "bad": "The machine shut himself down after the test.",
+          "edit_type": "reflexive_animacy_match"
+        }
+      ]
+    },
+    {
+      "name": "argument_structure",
+      "definition": "Different verbs permit different complements. Some require an object, some reject a direct object, and some require a particular complement such as a location phrase.",
+      "good_topics": [
+        "chores_routines",
+        "family_home",
+        "park_outdoors",
+        "travel_transport"
+      ],
+      "common_edit_types": [
+        "missing_object",
+        "illicit_object",
+        "missing_required_complement"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "argument_structure",
+          "topic": "family_home",
+          "good": "Nora placed the cups on the shelf.",
+          "bad": "Nora placed the cups.",
+          "edit_type": "missing_required_complement"
+        },
+        {
+          "phenomenon": "argument_structure",
+          "topic": "family_home",
+          "good": "The baby slept in the crib.",
+          "bad": "The baby slept the crib.",
+          "edit_type": "illicit_object"
+        },
+        {
+          "phenomenon": "argument_structure",
+          "topic": "family_home",
+          "good": "Liam resembles his uncle.",
+          "bad": "Liam resembles.",
+          "edit_type": "missing_object"
+        }
+      ]
+    },
+    {
+      "name": "binding",
+      "definition": "A reflexive must be licensed by an appropriate local antecedent in the right structural position. A nonlocal antecedent or an unlicensed reflexive makes the sentence ill-formed.",
+      "good_topics": [
+        "family_home",
+        "school_classroom",
+        "neighborhood_community"
+      ],
+      "common_edit_types": [
+        "unlicensed_reflexive",
+        "nonlocal_reflexive",
+        "reflexive_subject"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "binding",
+          "topic": "school_classroom",
+          "good": "The boys said that Emma photographed them at school.",
+          "bad": "The boys said that Emma photographed themselves at school.",
+          "edit_type": "unlicensed_reflexive"
+        },
+        {
+          "phenomenon": "binding",
+          "topic": "school_classroom",
+          "good": "Owen said that he could finish the report tonight.",
+          "bad": "Owen said that himself could finish the report tonight.",
+          "edit_type": "reflexive_subject"
+        },
+        {
+          "phenomenon": "binding",
+          "topic": "neighborhood_community",
+          "good": "Mila knew that Ryan would introduce her to the coach.",
+          "bad": "Mila knew that Ryan would introduce herself to the coach.",
+          "edit_type": "nonlocal_reflexive"
+        }
+      ]
+    },
+    {
+      "name": "control_raising",
+      "definition": "Some predicates allow raising or expletive subjects, while others require a semantic subject or behave like control predicates. These choices are not interchangeable.",
+      "good_topics": [
+        "travel_transport",
+        "school_classroom",
+        "books_stories",
+        "chores_routines"
+      ],
+      "common_edit_types": [
+        "expletive_there_with_raising",
+        "tough_vs_control",
+        "expletive_subject_selection"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "control_raising",
+          "topic": "travel_transport",
+          "good": "There seems to be a bus outside.",
+          "bad": "There hopes to be a bus outside.",
+          "edit_type": "expletive_there_with_raising"
+        },
+        {
+          "phenomenon": "control_raising",
+          "topic": "toys_games",
+          "good": "This puzzle is easy to solve.",
+          "bad": "This puzzle is eager to solve.",
+          "edit_type": "tough_vs_control"
+        },
+        {
+          "phenomenon": "control_raising",
+          "topic": "school_classroom",
+          "good": "There turned out to be enough chairs.",
+          "bad": "There tried to be enough chairs.",
+          "edit_type": "expletive_subject_selection"
+        }
+      ]
+    },
+    {
+      "name": "determiner_noun_agreement",
+      "definition": "Demonstrative determiners such as this, that, these, and those must match the noun in number.",
+      "good_topics": [
+        "shopping_market",
+        "household_objects",
+        "toys_games",
+        "food_meals"
+      ],
+      "common_edit_types": [
+        "determiner_number_match"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "determiner_noun_agreement",
+          "topic": "shopping_market",
+          "good": "Mira bought these ripe peaches yesterday.",
+          "bad": "Mira bought this ripe peaches yesterday.",
+          "edit_type": "determiner_number_match"
+        },
+        {
+          "phenomenon": "determiner_noun_agreement",
+          "topic": "household_objects",
+          "good": "We moved that heavy chair upstairs.",
+          "bad": "We moved those heavy chair upstairs.",
+          "edit_type": "determiner_number_match"
+        },
+        {
+          "phenomenon": "determiner_noun_agreement",
+          "topic": "animals_pets",
+          "good": "The children watched those geese by the pond.",
+          "bad": "The children watched that geese by the pond.",
+          "edit_type": "determiner_number_match"
+        }
+      ]
+    },
+    {
+      "name": "ellipsis",
+      "definition": "In certain noun-phrase ellipsis patterns, one or ones can stand in for the omitted noun phrase, but modifier order must still be grammatical.",
+      "good_topics": [
+        "shopping_market",
+        "household_objects",
+        "clothing_accessories"
+      ],
+      "common_edit_types": [
+        "one_anaphora_modifier_position",
+        "ones_anaphora_modifier_position",
+        "noun_phrase_ellipsis"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "ellipsis",
+          "topic": "household_objects",
+          "good": "I want the striped towel, not the plain one.",
+          "bad": "I want the striped towel, not the one plain.",
+          "edit_type": "one_anaphora_modifier_position"
+        },
+        {
+          "phenomenon": "ellipsis",
+          "topic": "household_objects",
+          "good": "Rosa kept the blue plates and sold the green ones.",
+          "bad": "Rosa kept the blue plates and sold the ones green.",
+          "edit_type": "ones_anaphora_modifier_position"
+        },
+        {
+          "phenomenon": "ellipsis",
+          "topic": "park_outdoors",
+          "good": "Take the long rope, not the short one.",
+          "bad": "Take the long rope, not the one short.",
+          "edit_type": "one_anaphora_modifier_position"
+        }
+      ]
+    },
+    {
+      "name": "filler_gap",
+      "definition": "In wh-dependencies and related constructions, a fronted expression is interpreted with a missing position later in the sentence. Adding an illicit overt object can destroy that dependency.",
+      "good_topics": [
+        "school_classroom",
+        "shopping_market",
+        "books_stories",
+        "park_outdoors"
+      ],
+      "common_edit_types": [
+        "resumptive_pronoun",
+        "filled_gap",
+        "wh_dependency"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "filler_gap",
+          "topic": "books_stories",
+          "good": "Which movie did Emma watch after dinner?",
+          "bad": "Which movie did Emma watch it after dinner?",
+          "edit_type": "resumptive_pronoun"
+        },
+        {
+          "phenomenon": "filler_gap",
+          "topic": "school_classroom",
+          "good": "What did Liam say that Chloe lost yesterday?",
+          "bad": "What did Liam say that Chloe lost it yesterday?",
+          "edit_type": "resumptive_pronoun"
+        },
+        {
+          "phenomenon": "filler_gap",
+          "topic": "shopping_market",
+          "good": "This is the scarf that Nora bought at the market.",
+          "bad": "This is the scarf that Nora bought it at the market.",
+          "edit_type": "resumptive_pronoun"
+        }
+      ]
+    },
+    {
+      "name": "irregular_forms",
+      "definition": "Some English participles and related forms are irregular, so the form required by the context cannot be replaced with a bare stem or the wrong irregular form.",
+      "good_topics": [
+        "chores_routines",
+        "family_home",
+        "park_outdoors"
+      ],
+      "common_edit_types": [
+        "irregular_participle",
+        "irregular_past_participle_adjective",
+        "irregular_auxiliary_form"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "irregular_forms",
+          "topic": "weather_seasons",
+          "good": "The window was broken during the storm.",
+          "bad": "The window was broke during the storm.",
+          "edit_type": "irregular_participle"
+        },
+        {
+          "phenomenon": "irregular_forms",
+          "topic": "school_classroom",
+          "good": "I have written the note already.",
+          "bad": "I have wrote the note already.",
+          "edit_type": "irregular_auxiliary_form"
+        },
+        {
+          "phenomenon": "irregular_forms",
+          "topic": "family_home",
+          "good": "The hidden key was under the mat.",
+          "bad": "The hid key was under the mat.",
+          "edit_type": "irregular_past_participle_adjective"
+        }
+      ]
+    },
+    {
+      "name": "island_effects",
+      "definition": "Some syntactic domains block extraction. A sentence may allow an ordinary wh-dependency, but a similar dependency becomes ill-formed when extraction crosses an island.",
+      "good_topics": [
+        "school_classroom",
+        "books_stories",
+        "travel_transport",
+        "clothing_accessories"
+      ],
+      "common_edit_types": [
+        "left_branch_extraction",
+        "wh_island",
+        "complex_np_island",
+        "coordinate_island"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "island_effects",
+          "topic": "school_classroom",
+          "good": "Whose backpack did Tara carry home?",
+          "bad": "Whose did Tara carry backpack home?",
+          "edit_type": "left_branch_extraction"
+        },
+        {
+          "phenomenon": "island_effects",
+          "topic": "clothing_accessories",
+          "good": "Which jacket should Leo wear tonight?",
+          "bad": "Which should Leo wear jacket tonight?",
+          "edit_type": "left_branch_extraction"
+        },
+        {
+          "phenomenon": "island_effects",
+          "topic": "school_classroom",
+          "good": "Who did Maya say that Leo disappointed at school?",
+          "bad": "Who did Maya wonder whether Leo disappointed at school?",
+          "edit_type": "wh_island"
+        }
+      ]
+    },
+    {
+      "name": "npi_licensing",
+      "definition": "Expressions such as any, ever, and at all usually need a licensing environment such as negation, a question, or only.",
+      "good_topics": [
+        "shopping_market",
+        "family_home",
+        "travel_transport",
+        "books_stories"
+      ],
+      "common_edit_types": [
+        "npi_under_negation",
+        "npi_in_question",
+        "npi_after_only"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "npi_licensing",
+          "topic": "neighborhood_community",
+          "good": "No cashier has ever shouted at me.",
+          "bad": "A cashier has ever shouted at me.",
+          "edit_type": "npi_under_negation"
+        },
+        {
+          "phenomenon": "npi_licensing",
+          "topic": "food_meals",
+          "good": "Did Nora bring anything for lunch?",
+          "bad": "Nora brought anything for lunch.",
+          "edit_type": "npi_in_question"
+        },
+        {
+          "phenomenon": "npi_licensing",
+          "topic": "travel_transport",
+          "good": "Only Ben had any idea where they went.",
+          "bad": "Ben had any idea where they went.",
+          "edit_type": "npi_after_only"
+        }
+      ]
+    },
+    {
+      "name": "quantifiers",
+      "definition": "Some quantificational expressions are restricted in where they can appear. For clean generation, prefer existential-there contrasts, where weak quantifiers are allowed but strong quantifiers are not.",
+      "good_topics": [
+        "shopping_market",
+        "household_objects",
+        "animals_pets",
+        "school_classroom"
+      ],
+      "common_edit_types": [
+        "existential_there_quantifier",
+        "existential_there_with_strong_quantifier"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "quantifiers",
+          "topic": "household_objects",
+          "good": "There is a lamp in the hall.",
+          "bad": "There is every lamp in the hall.",
+          "edit_type": "existential_there_quantifier"
+        },
+        {
+          "phenomenon": "quantifiers",
+          "topic": "toys_games",
+          "good": "There was a toy under the sofa.",
+          "bad": "There was each toy under the sofa.",
+          "edit_type": "existential_there_quantifier"
+        },
+        {
+          "phenomenon": "quantifiers",
+          "topic": "school_classroom",
+          "good": "There were three students in the library.",
+          "bad": "There were most students in the library.",
+          "edit_type": "existential_there_with_strong_quantifier"
+        }
+      ]
+    },
+    {
+      "name": "subject_verb_agreement",
+      "definition": "A finite present-tense verb must agree in number with its subject.",
+      "good_topics": [
+        "family_home",
+        "school_classroom",
+        "animals_pets",
+        "chores_routines",
+        "park_outdoors"
+      ],
+      "common_edit_types": [
+        "number_agreement"
+      ],
+      "seeds": [
+        {
+          "phenomenon": "subject_verb_agreement",
+          "topic": "school_classroom",
+          "good": "The teachers near the door smile politely.",
+          "bad": "The teachers near the door smiles politely.",
+          "edit_type": "number_agreement"
+        },
+        {
+          "phenomenon": "subject_verb_agreement",
+          "topic": "animals_pets",
+          "good": "The puppies in the yard bark loudly.",
+          "bad": "The puppies in the yard barks loudly.",
+          "edit_type": "number_agreement"
+        },
+        {
+          "phenomenon": "subject_verb_agreement",
+          "topic": "family_home",
+          "good": "The boys who visit their cousins walk home.",
+          "bad": "The boys who visit their cousins walks home.",
+          "edit_type": "number_agreement"
+        }
+      ]
+    }
+  ],
+  "topics": {
+    "all_topics_pool": [
+      "family_home",
+      "school_classroom",
+      "food_meals",
+      "animals_pets",
+      "toys_games",
+      "chores_routines",
+      "shopping_market",
+      "park_outdoors",
+      "travel_transport",
+      "neighborhood_community",
+      "books_stories",
+      "birthday_party",
+      "household_objects",
+      "sports_playground",
+      "clothing_accessories",
+      "garden_nature",
+      "weather_seasons",
+      "hobbies_music_art"
+    ],
+    "recommended_pairings": {
+      "anaphor_agreement": [
+        "family_home",
+        "school_classroom",
+        "neighborhood_community",
+        "household_objects"
+      ],
+      "argument_structure": [
+        "chores_routines",
+        "family_home",
+        "park_outdoors",
+        "travel_transport"
+      ],
+      "binding": [
+        "family_home",
+        "school_classroom",
+        "neighborhood_community",
+        "books_stories"
+      ],
+      "control_raising": [
+        "travel_transport",
+        "school_classroom",
+        "books_stories",
+        "chores_routines"
+      ],
+      "determiner_noun_agreement": [
+        "shopping_market",
+        "household_objects",
+        "toys_games",
+        "food_meals",
+        "clothing_accessories"
+      ],
+      "ellipsis": [
+        "shopping_market",
+        "household_objects",
+        "clothing_accessories",
+        "food_meals"
+      ],
+      "filler_gap": [
+        "school_classroom",
+        "shopping_market",
+        "books_stories",
+        "park_outdoors"
+      ],
+      "irregular_forms": [
+        "chores_routines",
+        "family_home",
+        "park_outdoors",
+        "weather_seasons"
+      ],
+      "island_effects": [
+        "school_classroom",
+        "books_stories",
+        "travel_transport",
+        "clothing_accessories"
+      ],
+      "npi_licensing": [
+        "shopping_market",
+        "family_home",
+        "travel_transport",
+        "books_stories",
+        "food_meals"
+      ],
+      "quantifiers": [
+        "shopping_market",
+        "household_objects",
+        "animals_pets",
+        "school_classroom",
+        "toys_games"
+      ],
+      "subject_verb_agreement": [
+        "family_home",
+        "school_classroom",
+        "animals_pets",
+        "chores_routines",
+        "park_outdoors"
+      ]
+    },
+    "topic_entries": [
+      {
+        "topic": "family_home",
+        "display_name": "Family and home",
+        "description": "Daily life at home, relatives, rooms, furniture, simple routines.",
+        "good_for": [
+          "anaphor_agreement",
+          "binding",
+          "subject_verb_agreement",
+          "irregular_forms",
+          "argument_structure"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "mother",
+            "brother",
+            "sister",
+            "kitchen",
+            "sofa",
+            "lamp",
+            "cup",
+            "towel"
+          ],
+          "verbs": [
+            "cook",
+            "wash",
+            "carry",
+            "clean",
+            "fix",
+            "blame",
+            "hide",
+            "place"
+          ],
+          "adjectives": [
+            "small",
+            "clean",
+            "quiet",
+            "broken",
+            "warm",
+            "heavy"
+          ]
+        }
+      },
+      {
+        "topic": "school_classroom",
+        "display_name": "School and classroom",
+        "description": "Teachers, students, books, desks, homework, classroom interactions.",
+        "good_for": [
+          "subject_verb_agreement",
+          "binding",
+          "filler_gap",
+          "island_effects",
+          "control_raising"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "teacher",
+            "student",
+            "desk",
+            "chair",
+            "book",
+            "report",
+            "library",
+            "classroom"
+          ],
+          "verbs": [
+            "read",
+            "write",
+            "carry",
+            "lose",
+            "borrow",
+            "praise",
+            "explain",
+            "finish"
+          ],
+          "adjectives": [
+            "quiet",
+            "late",
+            "careful",
+            "helpful",
+            "tall",
+            "blue"
+          ]
+        }
+      },
+      {
+        "topic": "neighborhood_community",
+        "display_name": "Neighborhood and community",
+        "description": "Neighbors, stores, streets, meetings, simple local events.",
+        "good_for": [
+          "binding",
+          "anaphor_agreement",
+          "subject_verb_agreement",
+          "npi_licensing"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "neighbor",
+            "street",
+            "store",
+            "coach",
+            "cashier",
+            "garden",
+            "park",
+            "meeting"
+          ],
+          "verbs": [
+            "greet",
+            "visit",
+            "call",
+            "help",
+            "watch",
+            "meet",
+            "repair",
+            "invite"
+          ],
+          "adjectives": [
+            "local",
+            "friendly",
+            "busy",
+            "quiet",
+            "new",
+            "nearby"
+          ]
+        }
+      },
+      {
+        "topic": "birthday_party",
+        "display_name": "Birthday party",
+        "description": "Guests, gifts, cake, balloons, invitations, party actions.",
+        "good_for": [
+          "binding",
+          "subject_verb_agreement",
+          "determiner_noun_agreement",
+          "quantifiers"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "cake",
+            "gift",
+            "balloon",
+            "guest",
+            "candle",
+            "plate",
+            "song",
+            "photo"
+          ],
+          "verbs": [
+            "bring",
+            "open",
+            "share",
+            "sing",
+            "laugh",
+            "invite",
+            "carry",
+            "cut"
+          ],
+          "adjectives": [
+            "happy",
+            "bright",
+            "sweet",
+            "large",
+            "colorful",
+            "noisy"
+          ]
+        }
+      },
+      {
+        "topic": "food_meals",
+        "display_name": "Food and meals",
+        "description": "Breakfast, lunch, snacks, fruit, dishes, table settings.",
+        "good_for": [
+          "determiner_noun_agreement",
+          "quantifiers",
+          "npi_licensing",
+          "ellipsis"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "apple",
+            "bread",
+            "plate",
+            "cookie",
+            "peach",
+            "lunch",
+            "soup",
+            "sandwich"
+          ],
+          "verbs": [
+            "eat",
+            "bring",
+            "cook",
+            "slice",
+            "share",
+            "buy",
+            "pack",
+            "serve"
+          ],
+          "adjectives": [
+            "ripe",
+            "fresh",
+            "hot",
+            "cold",
+            "sweet",
+            "salty"
+          ]
+        }
+      },
+      {
+        "topic": "toys_games",
+        "display_name": "Toys and games",
+        "description": "Children's toys, puzzles, board games, playful actions.",
+        "good_for": [
+          "determiner_noun_agreement",
+          "quantifiers",
+          "control_raising",
+          "subject_verb_agreement"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "toy",
+            "puzzle",
+            "ball",
+            "card",
+            "robot",
+            "doll",
+            "game",
+            "block"
+          ],
+          "verbs": [
+            "build",
+            "solve",
+            "throw",
+            "catch",
+            "trade",
+            "choose",
+            "drop",
+            "hide"
+          ],
+          "adjectives": [
+            "small",
+            "wooden",
+            "soft",
+            "easy",
+            "hard",
+            "new"
+          ]
+        }
+      },
+      {
+        "topic": "household_objects",
+        "display_name": "Household objects",
+        "description": "Objects in rooms and simple physical placement scenes.",
+        "good_for": [
+          "determiner_noun_agreement",
+          "ellipsis",
+          "quantifiers",
+          "anaphor_agreement"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "chair",
+            "table",
+            "plate",
+            "lamp",
+            "towel",
+            "bowl",
+            "key",
+            "blanket"
+          ],
+          "verbs": [
+            "move",
+            "wash",
+            "fold",
+            "place",
+            "drop",
+            "keep",
+            "sell",
+            "find"
+          ],
+          "adjectives": [
+            "plain",
+            "striped",
+            "blue",
+            "heavy",
+            "clean",
+            "round"
+          ]
+        }
+      },
+      {
+        "topic": "shopping_market",
+        "display_name": "Shopping and market",
+        "description": "Buying items, cashiers, bags, prices, market stalls.",
+        "good_for": [
+          "determiner_noun_agreement",
+          "npi_licensing",
+          "quantifiers",
+          "filler_gap",
+          "ellipsis"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "cashier",
+            "bag",
+            "basket",
+            "market",
+            "scarf",
+            "shirt",
+            "peach",
+            "receipt"
+          ],
+          "verbs": [
+            "buy",
+            "pay",
+            "carry",
+            "choose",
+            "return",
+            "sell",
+            "find",
+            "bring"
+          ],
+          "adjectives": [
+            "cheap",
+            "fresh",
+            "striped",
+            "green",
+            "small",
+            "heavy"
+          ]
+        }
+      },
+      {
+        "topic": "clothing_accessories",
+        "display_name": "Clothing and accessories",
+        "description": "Jackets, hats, scarves, shoes, getting dressed, choosing items.",
+        "good_for": [
+          "determiner_noun_agreement",
+          "ellipsis",
+          "island_effects"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "jacket",
+            "hat",
+            "scarf",
+            "shoe",
+            "glove",
+            "coat",
+            "dress",
+            "sock"
+          ],
+          "verbs": [
+            "wear",
+            "buy",
+            "choose",
+            "pack",
+            "wash",
+            "fold",
+            "carry",
+            "match"
+          ],
+          "adjectives": [
+            "warm",
+            "blue",
+            "striped",
+            "wet",
+            "clean",
+            "new"
+          ]
+        }
+      },
+      {
+        "topic": "chores_routines",
+        "display_name": "Chores and routines",
+        "description": "Daily chores, cleaning, arranging, fixing, repeated activities.",
+        "good_for": [
+          "argument_structure",
+          "irregular_forms",
+          "subject_verb_agreement",
+          "control_raising"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "floor",
+            "window",
+            "dish",
+            "towel",
+            "shelf",
+            "trash",
+            "laundry",
+            "bucket"
+          ],
+          "verbs": [
+            "clean",
+            "wash",
+            "fix",
+            "sweep",
+            "place",
+            "hang",
+            "break",
+            "write"
+          ],
+          "adjectives": [
+            "dirty",
+            "clean",
+            "broken",
+            "full",
+            "empty",
+            "wet"
+          ]
+        }
+      },
+      {
+        "topic": "park_outdoors",
+        "display_name": "Park and outdoors",
+        "description": "Walking, running, benches, paths, simple outdoor events.",
+        "good_for": [
+          "argument_structure",
+          "subject_verb_agreement",
+          "filler_gap",
+          "irregular_forms"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "park",
+            "bench",
+            "tree",
+            "rope",
+            "path",
+            "bird",
+            "ball",
+            "pond"
+          ],
+          "verbs": [
+            "walk",
+            "run",
+            "watch",
+            "throw",
+            "carry",
+            "climb",
+            "bark",
+            "hide"
+          ],
+          "adjectives": [
+            "long",
+            "green",
+            "small",
+            "loud",
+            "sunny",
+            "quiet"
+          ]
+        }
+      },
+      {
+        "topic": "travel_transport",
+        "display_name": "Travel and transport",
+        "description": "Buses, trains, trips, stations, passengers, moving around.",
+        "good_for": [
+          "control_raising",
+          "argument_structure",
+          "npi_licensing",
+          "island_effects"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "bus",
+            "train",
+            "ticket",
+            "station",
+            "bag",
+            "trip",
+            "driver",
+            "seat"
+          ],
+          "verbs": [
+            "board",
+            "leave",
+            "arrive",
+            "carry",
+            "miss",
+            "find",
+            "pack",
+            "wait"
+          ],
+          "adjectives": [
+            "late",
+            "early",
+            "crowded",
+            "empty",
+            "long",
+            "local"
+          ]
+        }
+      },
+      {
+        "topic": "sports_playground",
+        "display_name": "Sports and playground",
+        "description": "Games, teammates, playground equipment, simple motion events.",
+        "good_for": [
+          "argument_structure",
+          "subject_verb_agreement",
+          "quantifiers"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "ball",
+            "goal",
+            "player",
+            "coach",
+            "team",
+            "swing",
+            "field",
+            "race"
+          ],
+          "verbs": [
+            "kick",
+            "throw",
+            "catch",
+            "run",
+            "jump",
+            "coach",
+            "cheer",
+            "win"
+          ],
+          "adjectives": [
+            "fast",
+            "slow",
+            "young",
+            "tired",
+            "happy",
+            "strong"
+          ]
+        }
+      },
+      {
+        "topic": "animals_pets",
+        "display_name": "Animals and pets",
+        "description": "Pets, farm animals, simple actions and observations involving animals.",
+        "good_for": [
+          "subject_verb_agreement",
+          "quantifiers",
+          "determiner_noun_agreement"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "dog",
+            "cat",
+            "puppy",
+            "kitten",
+            "goose",
+            "duck",
+            "horse",
+            "rabbit"
+          ],
+          "verbs": [
+            "run",
+            "sleep",
+            "eat",
+            "bark",
+            "jump",
+            "follow",
+            "hide",
+            "watch"
+          ],
+          "adjectives": [
+            "hungry",
+            "small",
+            "noisy",
+            "brown",
+            "sleepy",
+            "young"
+          ]
+        }
+      },
+      {
+        "topic": "books_stories",
+        "display_name": "Books and stories",
+        "description": "Reading, telling stories, characters, reports, and simple narrative scenes.",
+        "good_for": [
+          "filler_gap",
+          "island_effects",
+          "control_raising",
+          "npi_licensing",
+          "binding"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "book",
+            "story",
+            "page",
+            "movie",
+            "hero",
+            "note",
+            "report",
+            "chapter"
+          ],
+          "verbs": [
+            "read",
+            "tell",
+            "watch",
+            "write",
+            "finish",
+            "lose",
+            "borrow",
+            "explain"
+          ],
+          "adjectives": [
+            "long",
+            "short",
+            "funny",
+            "sad",
+            "new",
+            "old"
+          ]
+        }
+      },
+      {
+        "topic": "hobbies_music_art",
+        "display_name": "Hobbies, music, and art",
+        "description": "Practice, songs, drawing, instruments, craft activities.",
+        "good_for": [
+          "subject_verb_agreement",
+          "binding",
+          "determiner_noun_agreement"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "song",
+            "guitar",
+            "brush",
+            "painting",
+            "drum",
+            "photo",
+            "dance",
+            "lesson"
+          ],
+          "verbs": [
+            "play",
+            "draw",
+            "paint",
+            "practice",
+            "sing",
+            "carry",
+            "share",
+            "finish"
+          ],
+          "adjectives": [
+            "loud",
+            "quiet",
+            "bright",
+            "smooth",
+            "new",
+            "careful"
+          ]
+        }
+      },
+      {
+        "topic": "garden_nature",
+        "display_name": "Garden and nature",
+        "description": "Plants, flowers, soil, weather-related outdoor maintenance.",
+        "good_for": [
+          "subject_verb_agreement",
+          "determiner_noun_agreement",
+          "quantifiers"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "flower",
+            "plant",
+            "garden",
+            "leaf",
+            "seed",
+            "soil",
+            "pot",
+            "branch"
+          ],
+          "verbs": [
+            "grow",
+            "water",
+            "plant",
+            "pick",
+            "carry",
+            "fall",
+            "bend",
+            "cover"
+          ],
+          "adjectives": [
+            "green",
+            "tall",
+            "dry",
+            "wet",
+            "small",
+            "fresh"
+          ]
+        }
+      },
+      {
+        "topic": "weather_seasons",
+        "display_name": "Weather and seasons",
+        "description": "Rain, wind, snow, storms, temperature, seasonal scenes.",
+        "good_for": [
+          "irregular_forms",
+          "subject_verb_agreement"
+        ],
+        "lexical_hints": {
+          "nouns": [
+            "rain",
+            "wind",
+            "storm",
+            "snow",
+            "cloud",
+            "sun",
+            "summer",
+            "winter"
+          ],
+          "verbs": [
+            "arrive",
+            "cover",
+            "break",
+            "freeze",
+            "melt",
+            "shake",
+            "darken",
+            "clear"
+          ],
+          "adjectives": [
+            "cold",
+            "warm",
+            "windy",
+            "wet",
+            "bright",
+            "stormy"
+          ]
+        }
+      }
+    ]
+  }
+}

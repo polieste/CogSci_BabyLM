@@ -1,0 +1,10 @@
+torch
+transformers
+accelerate
+nltk
+pandas
+sentencepiece
+safetensors
+pypdf
+openai
+google-genai

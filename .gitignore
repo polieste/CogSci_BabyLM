@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment files
+.env
+.env.*
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# Local model / training outputs
+babyllama_grammar_ft/
+gptbert_100m_grammar_ft/
+gptbert_10m_grammar_ft/
+checkpoints/
+runs/
+wandb/
+
+# Hugging Face / model artifacts
+hf_cache/
+
+# Generated data outputs
+*_generated_*.json
+*_generated_*.jsonl
+final_generated_grammar_data.jsonl
+train_ready_grammar_data.jsonl
+invalid_generated_grammar_data.jsonl
+duplicate_generated_grammar_data.jsonl
+generated_grammar_data_report.json
+
+# Preview / temporary pipeline outputs
+*_preview.json
+*_preview.jsonl
+report_preview.json
+merged_preview.jsonl
+merged_preview_shortid.jsonl
+train_ready_preview.jsonl
+invalid_preview.jsonl
+duplicates_preview.jsonl
+
+# Benchmark / evaluation / reports
+finetuned_babylm_benchmark_results.json
+babyllama_grammar_ft_report.json
+*.report.json
+
+# Optional exports
+generated_grammar_data_eda_export.csv
+train_ready_grammar_data_eda_export.csv
