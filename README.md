@@ -35,6 +35,12 @@ The overall task setup follows the BabyLM grammaticality judgment formulation:
 - [generation_config.py](./src/generation/generation_config.py)
   Shared helper that reads `prompt_topic_config.json` and builds prompts
 
+- [run_generation_matrix.ps1](./scripts/run_generation_matrix.ps1)
+  PowerShell batch runner for repeated generation across prompts, phenomena, and providers
+
+- [run_generation_matrix.sh](./scripts/run_generation_matrix.sh)
+  Bash batch runner with the same generation loop logic
+
 ### Data Processing
 
 - [prepare_generated_grammar_data.py](./src/postprocess/prepare_generated_grammar_data.py)
@@ -100,12 +106,19 @@ All generation scripts support:
 - `--count`
 - `--topics`
 - `--output`
+- `--append`
 
 If `--output` is omitted, the filename is created automatically using:
 
 ```text
 {LLM}_{Prompt-id}_{Phenomenon}_{Topic}_{HHMM}.json
 ```
+
+Default output directories are:
+
+- `data/raw/openai/`
+- `data/raw/grok/`
+- `data/raw/gemini/`
 
 Examples:
 
@@ -127,6 +140,12 @@ python src/generation/generate_grammaticality_data_grok.py --prompt-id prompt_2 
 python src/generation/generate_grammaticality_data_gemini.py --prompt-id prompt_3 --phenomenon ellipsis --count 10
 ```
 
+### Append new generations to the same file
+
+```powershell
+python src/generation/generate_grammaticality_data_openai.py --prompt-id prompt_1 --phenomenon anaphor_agreement --count 42 --output data/raw/openai/openai_prompt_1_anaphor_agreement.jsonl --append
+```
+
 Generated records follow the config schema:
 
 ```json
@@ -137,6 +156,40 @@ Generated records follow the config schema:
   "bad": "",
   "edit_type": ""
 }
+```
+
+### Batch generation scripts
+
+Both batch scripts:
+
+- read the phenomenon list from `data/topics/prompt_topic_config.json`
+- loop over `provider`, `prompt`, and `phenomenon`
+- repeat each configuration multiple times
+- append results into one shared file per `LLM + prompt + phenomenon`
+
+Current defaults in the batch scripts are:
+
+- prompts: `prompt_1`, `prompt_2`, `prompt_3`
+- providers: `grok`
+- count per run: `42`
+- repeats per configuration: `2`
+
+PowerShell example:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/run_generation_matrix.ps1 -WhatIf
+```
+
+Bash example:
+
+```bash
+bash scripts/run_generation_matrix.sh --what-if
+```
+
+Example with multiple providers:
+
+```bash
+bash scripts/run_generation_matrix.sh --providers openai,grok,gemini --phenomena anaphor_agreement,quantifiers
 ```
 
 
@@ -179,7 +232,7 @@ When you run it once, it now creates 3 groups of outputs:
 Example:
 
 ```powershell
-python src/postprocess/prepare_generated_grammar_data.py data/raw/generated --output data/processed/final_generated_grammar_data.jsonl
+python src/postprocess/prepare_generated_grammar_data.py data/raw/openai data/raw/grok data/raw/gemini --output data/processed/final_generated_grammar_data.jsonl
 ```
 
 Default outputs for that example:
@@ -258,19 +311,19 @@ Supported models include:
 ### Train BabyLLaMA
 
 ```powershell
-python src/training/train_babyllama_grammar.py --model-name babylm/babyllama-100m-2024 --train-file data/processed/train_ready_grammar_data.jsonl --output-dir artifacts/models/babyllama_grammar_ft
+python src/training/train_babyllama_grammar.py --model-name babylm/babyllama-100m-2024 --train-file data/processed/train_ready_grammar_data.jsonl --run-id exp1
 ```
 
 ### Train GPT-BERT 100M Causal Focus
 
 ```powershell
-python src/training/train_babyllama_grammar.py --model-name BabyLM-community/babylm-baseline-100m-gpt-bert-causal-focus --trust-remote-code --train-file data/processed/train_ready_grammar_data.jsonl --output-dir artifacts/models/gptbert_100m_grammar_ft
+python src/training/train_babyllama_grammar.py --model-name BabyLM-community/babylm-baseline-100m-gpt-bert-causal-focus --trust-remote-code --train-file data/processed/train_ready_grammar_data.jsonl --run-id exp1
 ```
 
 ### Train GPT-BERT 10M Causal Focus
 
 ```powershell
-python src/training/train_babyllama_grammar.py --model-name BabyLM-community/babylm-baseline-10m-gpt-bert-causal-focus --trust-remote-code --train-file data/processed/train_ready_grammar_data.jsonl --output-dir artifacts/models/gptbert_10m_grammar_ft
+python src/training/train_babyllama_grammar.py --model-name BabyLM-community/babylm-baseline-10m-gpt-bert-causal-focus --trust-remote-code --train-file data/processed/train_ready_grammar_data.jsonl --run-id exp1
 ```
 
 Useful arguments:
@@ -289,6 +342,12 @@ Outputs:
 - tokenizer files
 - training report JSON
 
+If `--output-dir` and `--report-file` are omitted, the script builds names automatically from the model family and `--run-id`, for example:
+
+- `artifacts/models/babyllama_2024_exp1`
+- `artifacts/models/babyllama_gpt_bert_100m_exp1`
+- `artifacts/models/babyllama_gpt_bert_10m_exp1`
+
 
 ## Stage 6: Evaluate on BLiMP
 
@@ -305,18 +364,20 @@ This script:
 ### Evaluate a Fine-Tuned BabyLLaMA Model
 
 ```powershell
-python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_grammar_ft --compare-base
+python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_2024_exp1 --compare-base --run-id exp1
 ```
 
 ### Evaluate a Fine-Tuned GPT-BERT Model
 
 ```powershell
-python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/gptbert_100m_grammar_ft --compare-base --base-model-name BabyLM-community/babylm-baseline-100m-gpt-bert-causal-focus --trust-remote-code
+python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_gpt_bert_100m_exp1 --compare-base --base-model-name BabyLM-community/babylm-baseline-100m-gpt-bert-causal-focus --trust-remote-code --run-id exp1
 ```
 
-Output:
+Default eval report outputs follow the same naming pattern, for example:
 
-- `data/reports/finetuned_babylm_benchmark_results.json`
+- `data/reports/babyllama_2024_exp1_eval.json`
+- `data/reports/babyllama_gpt_bert_100m_exp1_eval.json`
+- `data/reports/babyllama_gpt_bert_10m_exp1_eval.json`
 
 
 ## Example End-to-End Pipeline
@@ -330,7 +391,7 @@ python src/generation/generate_grammaticality_data_gemini.py --prompt-id prompt_
 ### 2. Merge all generated files
 
 ```powershell
-python src/postprocess/prepare_generated_grammar_data.py data/raw/generated --output data/processed/final_generated_grammar_data.jsonl
+python src/postprocess/prepare_generated_grammar_data.py data/raw/openai data/raw/grok data/raw/gemini --output data/processed/final_generated_grammar_data.jsonl
 ```
 
 ### 3. Validate and clean
@@ -348,19 +409,20 @@ Open:
 ### 5. Fine-tune
 
 ```powershell
-python src/training/train_babyllama_grammar.py --model-name babylm/babyllama-100m-2024 --train-file data/processed/train_ready_grammar_data.jsonl --output-dir artifacts/models/babyllama_grammar_ft --trust-remote-code
+python src/training/train_babyllama_grammar.py --model-name babylm/babyllama-100m-2024 --train-file data/processed/train_ready_grammar_data.jsonl --run-id exp1
 ```
 
 ### 6. Evaluate
 
 ```powershell
-python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_grammar_ft --compare-base --trust-remote-code
+python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_2024_exp1 --compare-base --run-id exp1
 ```
 
 
 ## Notes
 
 - The generator outputs are stored with `.json` filenames but may contain JSONL-style one-record-per-line content.
+- The batch generation scripts now append repeated runs into a single `.jsonl` file for each `LLM + prompt + phenomenon`.
 - The merge script can read both JSONL and standard JSON containers.
 - For GPT-BERT BabyLM baselines, `--trust-remote-code` may be required because the Hugging Face model card indicates custom code.
 - The training objective is grammaticality judgment oriented, not plain language-model next-token training.
