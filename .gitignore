@@ -40,7 +40,16 @@ hf_cache/
 
 # Repo outputs
 artifacts/
-data/
+
+# Ignore all data by default, then allow only small repo-critical files
+data/*
+!data/blimp/
+data/blimp/*
+!data/blimp/blimp_validation.json
+!data/topics/
+data/topics/*
+!data/topics/prompt_topic_config.json
+!data/topics/topic.txt
 
 # Generated data outputs
 *_generated_*.json
