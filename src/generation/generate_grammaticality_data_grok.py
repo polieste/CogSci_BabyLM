@@ -59,7 +59,7 @@ def parse_jsonl_output(text: str) -> list[dict]:
     return items
 
 
-def request_items(client: OpenAI, model: str, prompt: str) -> list[dict]:
+def request_items(client: OpenAI, model: str, prompt: str, temperature: float) -> list[dict]:
     response = client.responses.create(
         model=model,
         input=[
@@ -69,6 +69,7 @@ def request_items(client: OpenAI, model: str, prompt: str) -> list[dict]:
             }
         ],
         store=False,
+        temperature=temperature,
     )
 
     items = parse_jsonl_output(response.output_text)
@@ -138,6 +139,12 @@ def main() -> None:
         help="Number of items to generate.",
     )
     parser.add_argument(
+        "--temperature",
+        type=float,
+        default=0.2,
+        help="Sampling temperature. Higher values usually increase diversity.",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -167,11 +174,12 @@ def main() -> None:
         phenomenon=args.phenomenon,
         topics=allowed_topics,
     )
-    items = request_items(client, args.model, prompt)
+    items = request_items(client, args.model, prompt, args.temperature)
     write_jsonl(items, output_path, append=args.append)
 
     print(f"Prompt id: {args.prompt_id}")
     print(f"Allowed topics: {', '.join(allowed_topics)}")
+    print(f"Temperature: {args.temperature}")
     print(f"Wrote {len(items)} items to {output_path}")
 
 

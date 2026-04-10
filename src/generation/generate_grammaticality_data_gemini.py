@@ -54,13 +54,20 @@ def parse_jsonl_output(text: str) -> list[dict]:
     raise ValueError("Gemini response did not match the expected JSON schema.")
 
 
-def request_items(client: genai.Client, model: str, prompt: str, count: int) -> list[dict]:
+def request_items(
+    client: genai.Client,
+    model: str,
+    prompt: str,
+    count: int,
+    temperature: float,
+) -> list[dict]:
     response = client.models.generate_content(
         model=model,
         contents=prompt,
         config={
             "system_instruction": f"Return exactly {count} items as structured JSON with no extra commentary.",
             "thinking_config": types.ThinkingConfig(thinking_level="low"),
+            "temperature": temperature,
             "response_mime_type": "application/json",
             "response_json_schema": {
                 "type": "array",
@@ -136,6 +143,12 @@ def main() -> None:
         help="Number of items to generate.",
     )
     parser.add_argument(
+        "--temperature",
+        type=float,
+        default=0.2,
+        help="Sampling temperature. Higher values usually increase diversity.",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -165,11 +178,12 @@ def main() -> None:
         phenomenon=args.phenomenon,
         topics=allowed_topics,
     )
-    items = request_items(client, args.model, prompt, args.count)
+    items = request_items(client, args.model, prompt, args.count, args.temperature)
     write_jsonl(items, output_path, append=args.append)
 
     print(f"Prompt id: {args.prompt_id}")
     print(f"Allowed topics: {', '.join(allowed_topics)}")
+    print(f"Temperature: {args.temperature}")
     print(f"Wrote {len(items)} items to {output_path}")
 
 

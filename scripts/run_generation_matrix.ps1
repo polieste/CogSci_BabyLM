@@ -3,10 +3,8 @@ param(
     [int]$Count = 42,
     [int]$RepeatsPerPhenomenon = 2,
     [int]$DelaySeconds = 30,
-    # [string[]]$Prompts = @('prompt_1', 'prompt_2', 'prompt_3'),
-    # [string[]]$Providers = @('openai', 'grok', 'gemini'),
     [string[]]$Prompts = @('prompt_1', 'prompt_2', 'prompt_3'),
-    [string[]]$Providers = @('grok'),
+    [string[]]$Providers = @('openai', 'grok', 'gemini'),
     [string]$ConfigPath = 'data/topics/prompt_topic_config.json',
     [switch]$WhatIf
 )
