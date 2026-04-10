@@ -43,7 +43,6 @@
       "good_topics": [
         "family_home",
         "school_classroom",
-        "neighborhood_community",
         "household_objects"
       ],
       "common_edit_types": [
@@ -119,7 +118,7 @@
       "good_topics": [
         "family_home",
         "school_classroom",
-        "neighborhood_community"
+        "books_stories"
       ],
       "common_edit_types": [
         "unlicensed_reflexive",
@@ -143,9 +142,9 @@
         },
         {
           "phenomenon": "binding",
-          "topic": "neighborhood_community",
-          "good": "Mila knew that Ryan would introduce her to the coach.",
-          "bad": "Mila knew that Ryan would introduce herself to the coach.",
+          "topic": "school_classroom",
+          "good": "Mila knew that Ryan would introduce her to the teacher.",
+          "bad": "Mila knew that Ryan would introduce herself to the teacher.",
           "edit_type": "nonlocal_reflexive"
         }
       ]
@@ -174,7 +173,7 @@
         },
         {
           "phenomenon": "control_raising",
-          "topic": "toys_games",
+          "topic": "school_classroom",
           "good": "This puzzle is easy to solve.",
           "bad": "This puzzle is eager to solve.",
           "edit_type": "tough_vs_control"
@@ -194,8 +193,8 @@
       "good_topics": [
         "shopping_market",
         "household_objects",
-        "toys_games",
-        "food_meals"
+        "food_meals",
+        "animals_pets"
       ],
       "common_edit_types": [
         "determiner_number_match"
@@ -230,7 +229,7 @@
       "good_topics": [
         "shopping_market",
         "household_objects",
-        "clothing_accessories"
+        "food_meals"
       ],
       "common_edit_types": [
         "one_anaphora_modifier_position",
@@ -254,7 +253,7 @@
         },
         {
           "phenomenon": "ellipsis",
-          "topic": "park_outdoors",
+          "topic": "household_objects",
           "good": "Take the long rope, not the short one.",
           "bad": "Take the long rope, not the one short.",
           "edit_type": "one_anaphora_modifier_position"
@@ -315,7 +314,7 @@
       "seeds": [
         {
           "phenomenon": "irregular_forms",
-          "topic": "weather_seasons",
+          "topic": "family_home",
           "good": "The window was broken during the storm.",
           "bad": "The window was broke during the storm.",
           "edit_type": "irregular_participle"
@@ -342,8 +341,7 @@
       "good_topics": [
         "school_classroom",
         "books_stories",
-        "travel_transport",
-        "clothing_accessories"
+        "travel_transport"
       ],
       "common_edit_types": [
         "left_branch_extraction",
@@ -361,9 +359,9 @@
         },
         {
           "phenomenon": "island_effects",
-          "topic": "clothing_accessories",
-          "good": "Which jacket should Leo wear tonight?",
-          "bad": "Which should Leo wear jacket tonight?",
+          "topic": "school_classroom",
+          "good": "Which report should Leo read tonight?",
+          "bad": "Which should Leo read report tonight?",
           "edit_type": "left_branch_extraction"
         },
         {
@@ -382,7 +380,8 @@
         "shopping_market",
         "family_home",
         "travel_transport",
-        "books_stories"
+        "books_stories",
+        "food_meals"
       ],
       "common_edit_types": [
         "npi_under_negation",
@@ -392,7 +391,7 @@
       "seeds": [
         {
           "phenomenon": "npi_licensing",
-          "topic": "neighborhood_community",
+          "topic": "shopping_market",
           "good": "No cashier has ever shouted at me.",
           "bad": "A cashier has ever shouted at me.",
           "edit_type": "npi_under_negation"
@@ -420,7 +419,8 @@
         "shopping_market",
         "household_objects",
         "animals_pets",
-        "school_classroom"
+        "school_classroom",
+        "food_meals"
       ],
       "common_edit_types": [
         "existential_there_quantifier",
@@ -436,9 +436,9 @@
         },
         {
           "phenomenon": "quantifiers",
-          "topic": "toys_games",
-          "good": "There was a toy under the sofa.",
-          "bad": "There was each toy under the sofa.",
+          "topic": "household_objects",
+          "good": "There was a bowl on the shelf.",
+          "bad": "There was each bowl on the shelf.",
           "edit_type": "existential_there_quantifier"
         },
         {
@@ -494,26 +494,17 @@
       "school_classroom",
       "food_meals",
       "animals_pets",
-      "toys_games",
       "chores_routines",
       "shopping_market",
       "park_outdoors",
       "travel_transport",
-      "neighborhood_community",
       "books_stories",
-      "birthday_party",
-      "household_objects",
-      "sports_playground",
-      "clothing_accessories",
-      "garden_nature",
-      "weather_seasons",
-      "hobbies_music_art"
+      "household_objects"
     ],
     "recommended_pairings": {
       "anaphor_agreement": [
         "family_home",
         "school_classroom",
-        "neighborhood_community",
         "household_objects"
       ],
       "argument_structure": [
@@ -525,7 +516,6 @@
       "binding": [
         "family_home",
         "school_classroom",
-        "neighborhood_community",
         "books_stories"
       ],
       "control_raising": [
@@ -537,14 +527,12 @@
       "determiner_noun_agreement": [
         "shopping_market",
         "household_objects",
-        "toys_games",
         "food_meals",
-        "clothing_accessories"
+        "animals_pets"
       ],
       "ellipsis": [
         "shopping_market",
         "household_objects",
-        "clothing_accessories",
         "food_meals"
       ],
       "filler_gap": [
@@ -556,14 +544,12 @@
       "irregular_forms": [
         "chores_routines",
         "family_home",
-        "park_outdoors",
-        "weather_seasons"
+        "park_outdoors"
       ],
       "island_effects": [
         "school_classroom",
         "books_stories",
-        "travel_transport",
-        "clothing_accessories"
+        "travel_transport"
       ],
       "npi_licensing": [
         "shopping_market",
@@ -577,7 +563,7 @@
         "household_objects",
         "animals_pets",
         "school_classroom",
-        "toys_games"
+        "food_meals"
       ],
       "subject_verb_agreement": [
         "family_home",
@@ -673,88 +659,6 @@
         }
       },
       {
-        "topic": "neighborhood_community",
-        "display_name": "Neighborhood and community",
-        "description": "Neighbors, stores, streets, meetings, simple local events.",
-        "good_for": [
-          "binding",
-          "anaphor_agreement",
-          "subject_verb_agreement",
-          "npi_licensing"
-        ],
-        "lexical_hints": {
-          "nouns": [
-            "neighbor",
-            "street",
-            "store",
-            "coach",
-            "cashier",
-            "garden",
-            "park",
-            "meeting"
-          ],
-          "verbs": [
-            "greet",
-            "visit",
-            "call",
-            "help",
-            "watch",
-            "meet",
-            "repair",
-            "invite"
-          ],
-          "adjectives": [
-            "local",
-            "friendly",
-            "busy",
-            "quiet",
-            "new",
-            "nearby"
-          ]
-        }
-      },
-      {
-        "topic": "birthday_party",
-        "display_name": "Birthday party",
-        "description": "Guests, gifts, cake, balloons, invitations, party actions.",
-        "good_for": [
-          "binding",
-          "subject_verb_agreement",
-          "determiner_noun_agreement",
-          "quantifiers"
-        ],
-        "lexical_hints": {
-          "nouns": [
-            "cake",
-            "gift",
-            "balloon",
-            "guest",
-            "candle",
-            "plate",
-            "song",
-            "photo"
-          ],
-          "verbs": [
-            "bring",
-            "open",
-            "share",
-            "sing",
-            "laugh",
-            "invite",
-            "carry",
-            "cut"
-          ],
-          "adjectives": [
-            "happy",
-            "bright",
-            "sweet",
-            "large",
-            "colorful",
-            "noisy"
-          ]
-        }
-      },
-      {
         "topic": "food_meals",
         "display_name": "Food and meals",
         "description": "Breakfast, lunch, snacks, fruit, dishes, table settings.",
@@ -792,47 +696,6 @@
             "cold",
             "sweet",
             "salty"
-          ]
-        }
-      },
-      {
-        "topic": "toys_games",
-        "display_name": "Toys and games",
-        "description": "Children's toys, puzzles, board games, playful actions.",
-        "good_for": [
-          "determiner_noun_agreement",
-          "quantifiers",
-          "control_raising",
-          "subject_verb_agreement"
-        ],
-        "lexical_hints": {
-          "nouns": [
-            "toy",
-            "puzzle",
-            "ball",
-            "card",
-            "robot",
-            "doll",
-            "game",
-            "block"
-          ],
-          "verbs": [
-            "build",
-            "solve",
-            "throw",
-            "catch",
-            "trade",
-            "choose",
-            "drop",
-            "hide"
-          ],
-          "adjectives": [
-            "small",
-            "wooden",
-            "soft",
-            "easy",
-            "hard",
-            "new"
           ]
         }
       },
@@ -916,46 +779,6 @@
             "green",
             "small",
             "heavy"
-          ]
-        }
-      },
-      {
-        "topic": "clothing_accessories",
-        "display_name": "Clothing and accessories",
-        "description": "Jackets, hats, scarves, shoes, getting dressed, choosing items.",
-        "good_for": [
-          "determiner_noun_agreement",
-          "ellipsis",
-          "island_effects"
-        ],
-        "lexical_hints": {
-          "nouns": [
-            "jacket",
-            "hat",
-            "scarf",
-            "shoe",
-            "glove",
-            "coat",
-            "dress",
-            "sock"
-          ],
-          "verbs": [
-            "wear",
-            "buy",
-            "choose",
-            "pack",
-            "wash",
-            "fold",
-            "carry",
-            "match"
-          ],
-          "adjectives": [
-            "warm",
-            "blue",
-            "striped",
-            "wet",
-            "clean",
-            "new"
           ]
         }
       },
@@ -1083,46 +906,6 @@
         }
       },
       {
-        "topic": "sports_playground",
-        "display_name": "Sports and playground",
-        "description": "Games, teammates, playground equipment, simple motion events.",
-        "good_for": [
-          "argument_structure",
-          "subject_verb_agreement",
-          "quantifiers"
-        ],
-        "lexical_hints": {
-          "nouns": [
-            "ball",
-            "goal",
-            "player",
-            "coach",
-            "team",
-            "swing",
-            "field",
-            "race"
-          ],
-          "verbs": [
-            "kick",
-            "throw",
-            "catch",
-            "run",
-            "jump",
-            "coach",
-            "cheer",
-            "win"
-          ],
-          "adjectives": [
-            "fast",
-            "slow",
-            "young",
-            "tired",
-            "happy",
-            "strong"
-          ]
-        }
-      },
-      {
         "topic": "animals_pets",
         "display_name": "Animals and pets",
         "description": "Pets, farm animals, simple actions and observations involving animals.",
@@ -1201,125 +984,6 @@
             "sad",
             "new",
             "old"
-          ]
-        }
-      },
-      {
-        "topic": "hobbies_music_art",
-        "display_name": "Hobbies, music, and art",
-        "description": "Practice, songs, drawing, instruments, craft activities.",
-        "good_for": [
-          "subject_verb_agreement",
-          "binding",
-          "determiner_noun_agreement"
-        ],
-        "lexical_hints": {
-          "nouns": [
-            "song",
-            "guitar",
-            "brush",
-            "painting",
-            "drum",
-            "photo",
-            "dance",
-            "lesson"
-          ],
-          "verbs": [
-            "play",
-            "draw",
-            "paint",
-            "practice",
-            "sing",
-            "carry",
-            "share",
-            "finish"
-          ],
-          "adjectives": [
-            "loud",
-            "quiet",
-            "bright",
-            "smooth",
-            "new",
-            "careful"
-          ]
-        }
-      },
-      {
-        "topic": "garden_nature",
-        "display_name": "Garden and nature",
-        "description": "Plants, flowers, soil, weather-related outdoor maintenance.",
-        "good_for": [
-          "subject_verb_agreement",
-          "determiner_noun_agreement",
-          "quantifiers"
-        ],
-        "lexical_hints": {
-          "nouns": [
-            "flower",
-            "plant",
-            "garden",
-            "leaf",
-            "seed",
-            "soil",
-            "pot",
-            "branch"
-          ],
-          "verbs": [
-            "grow",
-            "water",
-            "plant",
-            "pick",
-            "carry",
-            "fall",
-            "bend",
-            "cover"
-          ],
-          "adjectives": [
-            "green",
-            "tall",
-            "dry",
-            "wet",
-            "small",
-            "fresh"
-          ]
-        }
-      },
-      {
-        "topic": "weather_seasons",
-        "display_name": "Weather and seasons",
-        "description": "Rain, wind, snow, storms, temperature, seasonal scenes.",
-        "good_for": [
-          "irregular_forms",
-          "subject_verb_agreement"
-        ],
-        "lexical_hints": {
-          "nouns": [
-            "rain",
-            "wind",
-            "storm",
-            "snow",
-            "cloud",
-            "sun",
-            "summer",
-            "winter"
-          ],
-          "verbs": [
-            "arrive",
-            "cover",
-            "break",
-            "freeze",
-            "melt",
-            "shake",
-            "darken",
-            "clear"
-          ],
-          "adjectives": [
-            "cold",
-            "warm",
-            "windy",
-            "wet",
-            "bright",
-            "stormy"
           ]
         }
       }

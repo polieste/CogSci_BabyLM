@@ -76,9 +76,10 @@ def request_items(client: OpenAI, model: str, prompt: str, count: int) -> list[d
     return payload["items"]
 
 
-def write_jsonl(items: list[dict], output_path: Path) -> None:
+def write_jsonl(items: list[dict], output_path: Path, append: bool = False) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8") as f:
+    mode = "a" if append else "w"
+    with output_path.open(mode, encoding="utf-8") as f:
         for item in items:
             f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
@@ -98,7 +99,7 @@ def build_default_output_path(provider: str, prompt_id: str, phenomenon: str, to
         f"{make_safe_filename_part(topic_label)}_"
         f"{timestamp}.json"
     )
-    return Path("data/raw/generated") / filename
+    return Path("data/raw/openai") / filename
 
 
 def main() -> None:
@@ -143,6 +144,11 @@ def main() -> None:
         default=None,
         help="Path to the JSONL output file.",
     )
+    parser.add_argument(
+        "--append",
+        action="store_true",
+        help="Append generated items to the output file instead of overwriting it.",
+    )
     args = parser.parse_args()
 
     config = load_generation_config(args.config)
@@ -163,7 +169,7 @@ def main() -> None:
         topics=allowed_topics,
     )
     items = request_items(client, args.model, prompt, args.count)
-    write_jsonl(items, output_path)
+    write_jsonl(items, output_path, append=args.append)
 
     print(f"Prompt id: {args.prompt_id}")
     print(f"Allowed topics: {', '.join(allowed_topics)}")

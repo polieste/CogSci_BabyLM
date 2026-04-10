@@ -142,7 +142,7 @@ Generated records follow the config schema:
 
 ## Stage 2: Merge Generated Files
 
-Use [prepare_generated_grammar_data.py](./src/postprocess/prepare_generated_grammar_data.py) to combine many generated files into one normalized JSONL dataset.
+Use [prepare_generated_grammar_data.py](./src/postprocess/prepare_generated_grammar_data.py) to combine many generated files into normalized JSONL datasets.
 
 It accepts:
 
@@ -170,11 +170,23 @@ Output schema:
 }
 ```
 
+When you run it once, it now creates 3 groups of outputs:
+
+- one merged file containing all records
+- one folder of merged files grouped by `parent_llm`
+- one folder of merged files grouped by `parent_llm` and `prompt_family`
+
 Example:
 
 ```powershell
 python src/postprocess/prepare_generated_grammar_data.py data/raw/generated --output data/processed/final_generated_grammar_data.jsonl
 ```
+
+Default outputs for that example:
+
+- `data/processed/final_generated_grammar_data.jsonl`
+- `data/processed/final_generated_grammar_data_by_llm/`
+- `data/processed/final_generated_grammar_data_by_llm_prompt/`
 
 
 ## Stage 3: Validate and Clean the Data

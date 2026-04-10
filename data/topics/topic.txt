@@ -1,99 +1,12 @@
-"all_topics_pool": [
-      "family_home",
-      "school_classroom",
-      "food_meals",
-      "animals_pets",
-      "toys_games",
-      "chores_routines",
-      "shopping_market",
-      "park_outdoors",
-      "travel_transport",
-      "neighborhood_community",
-      "books_stories",
-      "birthday_party",
-      "household_objects",
-      "sports_playground",
-      "clothing_accessories",
-      "garden_nature",
-      "weather_seasons",
-      "hobbies_music_art"
-    ]
-
-"recommended_pairings": {
-      "anaphor_agreement": [
-        "family_home",
-        "school_classroom",
-        "neighborhood_community",
-        "household_objects"
-      ],
-      "argument_structure": [
-        "chores_routines",
-        "family_home",
-        "park_outdoors",
-        "travel_transport"
-      ],
-      "binding": [
-        "family_home",
-        "school_classroom",
-        "neighborhood_community",
-        "books_stories"
-      ],
-      "control_raising": [
-        "travel_transport",
-        "school_classroom",
-        "books_stories",
-        "chores_routines"
-      ],
-      "determiner_noun_agreement": [
-        "shopping_market",
-        "household_objects",
-        "toys_games",
-        "food_meals",
-        "clothing_accessories"
-      ],
-      "ellipsis": [
-        "shopping_market",
-        "household_objects",
-        "clothing_accessories",
-        "food_meals"
-      ],
-      "filler_gap": [
-        "school_classroom",
-        "shopping_market",
-        "books_stories",
-        "park_outdoors"
-      ],
-      "irregular_forms": [
-        "chores_routines",
-        "family_home",
-        "park_outdoors",
-        "weather_seasons"
-      ],
-      "island_effects": [
-        "school_classroom",
-        "books_stories",
-        "travel_transport",
-        "clothing_accessories"
-      ],
-      "npi_licensing": [
-        "shopping_market",
-        "family_home",
-        "travel_transport",
-        "books_stories",
-        "food_meals"
-      ],
-      "quantifiers": [
-        "shopping_market",
-        "household_objects",
-        "animals_pets",
-        "school_classroom",
-        "toys_games"
-      ],
-      "subject_verb_agreement": [
-        "family_home",
-        "school_classroom",
-        "animals_pets",
-        "chores_routines",
-        "park_outdoors"
-      ]
-    },
+anaphor_agreement
+determiner_noun_agreement
+irregular_forms
+ellipsis	
+subject_verb_agreement
+control_raising	
+argument_structure	
+filler_gap
+binding
+quantifiers
+npi_licensing
+island_effects

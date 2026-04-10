@@ -40,9 +40,7 @@ hf_cache/
 
 # Repo outputs
 artifacts/
-data/raw/generated/
-data/processed/
-data/reports/
+data/
 
 # Generated data outputs
 *_generated_*.json

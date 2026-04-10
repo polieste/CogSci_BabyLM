@@ -2,6 +2,7 @@ import argparse
 import json
 import hashlib
 from pathlib import Path
+from collections import defaultdict
 
 
 SUPPORTED_SUFFIXES = {".json", ".jsonl"}
@@ -136,9 +137,26 @@ def write_jsonl(records: list[dict], output_path: Path) -> None:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
+def sanitize_name(value: str) -> str:
+    cleaned = normalize_text(value).replace(" ", "_").replace("-", "_")
+    return cleaned or "unknown"
+
+
+def build_output_paths(base_output: Path) -> tuple[Path, Path, Path]:
+    base_dir = base_output.parent
+    stem = base_output.stem
+    suffix = base_output.suffix or ".jsonl"
+    all_output = base_output
+    by_llm_dir = base_dir / f"{stem}_by_llm"
+    by_llm_prompt_dir = base_dir / f"{stem}_by_llm_prompt"
+    if suffix != ".jsonl":
+        all_output = all_output.with_suffix(".jsonl")
+    return all_output, by_llm_dir, by_llm_prompt_dir
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Merge generated grammaticality data files into one normalized JSONL dataset."
+        description="Merge generated grammaticality data files into normalized JSONL outputs."
     )
     parser.add_argument(
         "inputs",
@@ -161,8 +179,34 @@ def main() -> None:
         for index, record in enumerate(raw_records, start=1):
             normalized_records.append(transform_record(record, path, index))
 
-    write_jsonl(normalized_records, args.output)
-    print(f"Merged {len(normalized_records)} records from {len(input_files)} files into {args.output}")
+    all_output, by_llm_dir, by_llm_prompt_dir = build_output_paths(args.output)
+    write_jsonl(normalized_records, all_output)
+
+    records_by_llm: dict[str, list[dict]] = defaultdict(list)
+    records_by_llm_prompt: dict[tuple[str, str], list[dict]] = defaultdict(list)
+
+    for record in normalized_records:
+        llm_name = sanitize_name(record["parent_llm"])
+        prompt_name = sanitize_name(record["prompt_family"])
+        records_by_llm[llm_name].append(record)
+        records_by_llm_prompt[(llm_name, prompt_name)].append(record)
+
+    by_llm_paths = []
+    for llm_name, records in sorted(records_by_llm.items()):
+        output_path = by_llm_dir / f"{llm_name}.jsonl"
+        write_jsonl(records, output_path)
+        by_llm_paths.append(output_path)
+
+    by_llm_prompt_paths = []
+    for (llm_name, prompt_name), records in sorted(records_by_llm_prompt.items()):
+        output_path = by_llm_prompt_dir / f"{llm_name}_{prompt_name}.jsonl"
+        write_jsonl(records, output_path)
+        by_llm_prompt_paths.append(output_path)
+
+    print(f"Merged {len(normalized_records)} records from {len(input_files)} files.")
+    print(f"All data: {all_output}")
+    print(f"By LLM: {by_llm_dir} ({len(by_llm_paths)} files)")
+    print(f"By LLM + prompt: {by_llm_prompt_dir} ({len(by_llm_prompt_paths)} files)")
 
 
 if __name__ == "__main__":
