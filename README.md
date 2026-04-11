@@ -137,7 +137,7 @@ python src/generation/generate_grammaticality_data_grok.py --prompt-id prompt_2 
 ### Gemini
 
 ```powershell
-python src/generation/generate_grammaticality_data_gemini.py --prompt-id prompt_3 --phenomenon ellipsis --count 10
+python src/generation/generate_grammaticality_data_gemini.py --prompt-id prompt_3 --phenomenon ellipsis --count 40
 ```
 
 ### Append new generations to the same file

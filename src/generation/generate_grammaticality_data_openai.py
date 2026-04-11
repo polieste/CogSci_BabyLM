@@ -40,7 +40,6 @@ def request_items(
     model: str,
     prompt: str,
     count: int,
-    temperature: float,
 ) -> list[dict]:
     response = client.responses.create(
         model=model,
@@ -56,7 +55,6 @@ def request_items(
             }
         ],
         reasoning={"effort": "low"},
-        temperature=temperature,
         text={
             "format": {
                 "type": "json_schema",
@@ -146,12 +144,6 @@ def main() -> None:
         help="Number of items to generate.",
     )
     parser.add_argument(
-        "--temperature",
-        type=float,
-        default=0.2,
-        help="Sampling temperature. Higher values usually increase diversity.",
-    )
-    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -181,12 +173,11 @@ def main() -> None:
         phenomenon=args.phenomenon,
         topics=allowed_topics,
     )
-    items = request_items(client, args.model, prompt, args.count, args.temperature)
+    items = request_items(client, args.model, prompt, args.count)
     write_jsonl(items, output_path, append=args.append)
 
     print(f"Prompt id: {args.prompt_id}")
     print(f"Allowed topics: {', '.join(allowed_topics)}")
-    print(f"Temperature: {args.temperature}")
     print(f"Wrote {len(items)} items to {output_path}")
 
 

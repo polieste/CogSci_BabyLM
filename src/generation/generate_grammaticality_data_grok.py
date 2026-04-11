@@ -141,7 +141,7 @@ def main() -> None:
     parser.add_argument(
         "--temperature",
         type=float,
-        default=0.2,
+        default=0.1,
         help="Sampling temperature. Higher values usually increase diversity.",
     )
     parser.add_argument(

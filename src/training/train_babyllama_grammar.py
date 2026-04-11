@@ -470,7 +470,7 @@ def main() -> None:
     parser.add_argument(
         "--batch-size",
         type=int,
-        default=8,
+        default=128,
         help="Batch size for pairwise training.",
     )
     parser.add_argument(
@@ -482,7 +482,7 @@ def main() -> None:
     parser.add_argument(
         "--epochs",
         type=int,
-        default=10,
+        default=100,
         help="Maximum number of training epochs.",
     )
     parser.add_argument(
@@ -500,7 +500,7 @@ def main() -> None:
     parser.add_argument(
         "--patience",
         type=int,
-        default=3,
+        default=4,
         help="Stop if validation accuracy does not improve for this many epochs.",
     )
     parser.add_argument(

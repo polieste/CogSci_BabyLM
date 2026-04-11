@@ -178,7 +178,7 @@ def main() -> None:
     parser.add_argument(
         "--batch-size",
         type=int,
-        default=8,
+        default=128,
         help="Batch size for BLiMP evaluation.",
     )
     parser.add_argument(
