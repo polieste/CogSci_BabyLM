@@ -15,6 +15,12 @@ The overall task setup follows the BabyLM grammaticality judgment formulation:
 - training encourages the model to assign higher sentence probability to `good`
 - evaluation compares sentence probabilities on BLiMP minimal pairs
 
+The officially used pretrained models in this project are:
+
+- `babylm/babyllama-100m-2024` as the main model
+- `babylm/babyllama-10m-2024`
+- `babylm/opt-125m-strict-2023`
+
 
 ## Project Files
 
@@ -35,8 +41,14 @@ The overall task setup follows the BabyLM grammaticality judgment formulation:
 - [generation_config.py](./src/generation/generation_config.py)
   Shared helper that reads `prompt_topic_config.json` and builds prompts
 
-- [run_generation_matrix.ps1](./scripts/run_generation_matrix.ps1)
-  PowerShell batch runner for repeated generation across prompts, phenomena, and providers
+- [run_generation_matrix_openai.ps1](./scripts/run_generation_matrix_openai.ps1)
+  PowerShell batch runner for repeated OpenAI generation across prompts and phenomena
+
+- [run_generation_matrix_grok.ps1](./scripts/run_generation_matrix_grok.ps1)
+  PowerShell batch runner for repeated Grok generation across prompts and phenomena
+
+- [run_generation_matrix_gemini.ps1](./scripts/run_generation_matrix_gemini.ps1)
+  PowerShell batch runner for repeated Gemini generation across prompts and phenomena
 
 - [run_generation_matrix.sh](./scripts/run_generation_matrix.sh)
   Bash batch runner with the same generation loop logic
@@ -177,7 +189,7 @@ Current defaults in the batch scripts are:
 PowerShell example:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/run_generation_matrix.ps1 -WhatIf
+powershell -ExecutionPolicy Bypass -File scripts/run_generation_matrix_grok.ps1 -WhatIf
 ```
 
 Bash example:
@@ -305,25 +317,25 @@ This script:
 Supported models include:
 
 - `babylm/babyllama-100m-2024`
-- `BabyLM-community/babylm-baseline-100m-gpt-bert-causal-focus`
-- `BabyLM-community/babylm-baseline-10m-gpt-bert-causal-focus`
+- `babylm/babyllama-10m-2024`
+- `babylm/opt-125m-strict-2023`
 
-### Train BabyLLaMA
+### Train Main Model: BabyLLaMA 100M
 
 ```powershell
 python src/training/train_babyllama_grammar.py --model-name babylm/babyllama-100m-2024 --train-file data/processed/train_ready_grammar_data.jsonl --run-id exp1
 ```
 
-### Train GPT-BERT 100M Causal Focus
+### Train BabyLLaMA 10M
 
 ```powershell
-python src/training/train_babyllama_grammar.py --model-name BabyLM-community/babylm-baseline-100m-gpt-bert-causal-focus --trust-remote-code --train-file data/processed/train_ready_grammar_data.jsonl --run-id exp1
+python src/training/train_babyllama_grammar.py --model-name babylm/babyllama-10m-2024 --train-file data/processed/train_ready_grammar_data.jsonl --run-id exp1
 ```
 
-### Train GPT-BERT 10M Causal Focus
+### Train OPT 125M Strict 2023
 
 ```powershell
-python src/training/train_babyllama_grammar.py --model-name BabyLM-community/babylm-baseline-10m-gpt-bert-causal-focus --trust-remote-code --train-file data/processed/train_ready_grammar_data.jsonl --run-id exp1
+python src/training/train_babyllama_grammar.py --model-name babylm/opt-125m-strict-2023 --train-file data/processed/train_ready_grammar_data.jsonl --run-id exp1
 ```
 
 Useful arguments:
@@ -334,7 +346,6 @@ Useful arguments:
 - `--valid-ratio`
 - `--patience`
 - `--grad-accum-steps`
-- `--trust-remote-code`
 
 Outputs:
 
@@ -344,9 +355,9 @@ Outputs:
 
 If `--output-dir` and `--report-file` are omitted, the script builds names automatically from the model family and `--run-id`, for example:
 
-- `artifacts/models/babyllama_2024_exp1`
-- `artifacts/models/babyllama_gpt_bert_100m_exp1`
-- `artifacts/models/babyllama_gpt_bert_10m_exp1`
+- `artifacts/models/babyllama_100m_2024_exp1`
+- `artifacts/models/babyllama_10m_2024_exp1`
+- `artifacts/models/opt_125m_strict_2023_exp1`
 
 
 ## Stage 6: Evaluate on BLiMP
@@ -364,20 +375,26 @@ This script:
 ### Evaluate a Fine-Tuned BabyLLaMA Model
 
 ```powershell
-python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_2024_exp1 --compare-base --run-id exp1
+python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_100m_2024_exp1 --compare-base --run-id exp1
 ```
 
-### Evaluate a Fine-Tuned GPT-BERT Model
+### Evaluate a Fine-Tuned 10M Model
 
 ```powershell
-python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_gpt_bert_100m_exp1 --compare-base --base-model-name BabyLM-community/babylm-baseline-100m-gpt-bert-causal-focus --trust-remote-code --run-id exp1
+python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_10m_2024_exp1 --compare-base --base-model-name babylm/babyllama-10m-2024 --run-id exp1
+```
+
+### Evaluate a Fine-Tuned OPT 125M Model
+
+```powershell
+python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/opt_125m_strict_2023_exp1 --compare-base --base-model-name babylm/opt-125m-strict-2023 --run-id exp1
 ```
 
 Default eval report outputs follow the same naming pattern, for example:
 
-- `data/reports/babyllama_2024_exp1_eval.json`
-- `data/reports/babyllama_gpt_bert_100m_exp1_eval.json`
-- `data/reports/babyllama_gpt_bert_10m_exp1_eval.json`
+- `data/reports/babyllama_100m_2024_exp1_eval.json`
+- `data/reports/babyllama_10m_2024_exp1_eval.json`
+- `data/reports/opt_125m_strict_2023_exp1_eval.json`
 
 
 ## Example End-to-End Pipeline
@@ -415,7 +432,7 @@ python src/training/train_babyllama_grammar.py --model-name babylm/babyllama-100
 ### 6. Evaluate
 
 ```powershell
-python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_2024_exp1 --compare-base --run-id exp1
+python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models/babyllama_100m_2024_exp1 --compare-base --run-id exp1
 ```
 
 
@@ -424,6 +441,6 @@ python src/training/evaluate_finetuned_babyllama.py --model-dir artifacts/models
 - The generator outputs are stored with `.json` filenames but may contain JSONL-style one-record-per-line content.
 - The batch generation scripts now append repeated runs into a single `.jsonl` file for each `LLM + prompt + phenomenon`.
 - The merge script can read both JSONL and standard JSON containers.
-- For GPT-BERT BabyLM baselines, `--trust-remote-code` may be required because the Hugging Face model card indicates custom code.
+- The main pretrained model used in this project is `babylm/babyllama-100m-2024`.
 - The training objective is grammaticality judgment oriented, not plain language-model next-token training.
 - The BLiMP evaluation uses sentence log probability comparison without length normalization, matching the benchmark setup used in the notebook.

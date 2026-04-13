@@ -20,11 +20,11 @@ DEFAULT_MODEL_NAME = "babylm/babyllama-100m-2024"
 def build_model_run_name(model_name: str, run_id: str | None = None) -> str:
     model_key = model_name.lower()
     if model_key == "babylm/babyllama-100m-2024":
-        base_name = "babyllama_2024"
-    elif model_key == "babylm-community/babylm-baseline-100m-gpt-bert-causal-focus":
-        base_name = "babyllama_gpt_bert_100m"
-    elif model_key == "babylm-community/babylm-baseline-10m-gpt-bert-causal-focus":
-        base_name = "babyllama_gpt_bert_10m"
+        base_name = "babyllama_100m_2024"
+    elif model_key == "babylm/babyllama-10m-2024":
+        base_name = "babyllama_10m_2024"
+    elif model_key == "babylm/opt-125m-strict-2023":
+        base_name = "opt_125m_strict_2023"
     else:
         slug = model_name.split("/")[-1].lower()
         for src, dst in [("-", "_"), (" ", "_"), (".", "_")]:
@@ -521,7 +521,7 @@ def main() -> None:
     parser.add_argument(
         "--trust-remote-code",
         action="store_true",
-        help="Enable Hugging Face trust_remote_code for custom architectures such as GPT-BERT baselines.",
+        help="Enable Hugging Face trust_remote_code for custom architectures when needed.",
     )
     args = parser.parse_args()
 

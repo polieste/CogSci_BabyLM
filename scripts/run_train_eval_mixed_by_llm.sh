@@ -23,7 +23,7 @@ Expected layout:
 
 For each input file, the script runs:
   1. train_babyllama_grammar.py with --train-file <file> and --run-id <file_stem>
-  2. evaluate_finetuned_babyllama.py with --model-dir artifacts/models/babyllama_2024_<file_stem>
+  2. evaluate_finetuned_babyllama.py with --model-dir artifacts/models/babyllama_100m_2024_<file_stem>
 EOF
 }
 
@@ -76,7 +76,7 @@ echo
 for input_file in "${INPUT_FILES[@]}"; do
   index=$((index + 1))
   run_id="$(basename "${input_file%.*}")"
-  model_dir="artifacts/models/babyllama_2024_${run_id}"
+  model_dir="artifacts/models/babyllama_100m_2024_${run_id}"
 
   train_args=(
     "src/training/train_babyllama_grammar.py"

@@ -23,7 +23,7 @@ Expected layout:
 
 For each subfolder, the script runs:
   1. train_babyllama_grammar.py with --run-id <folder_name>
-  2. evaluate_finetuned_babyllama.py with --model-dir artifacts/models/babyllama_2024_<folder_name>
+  2. evaluate_finetuned_babyllama.py with --model-dir artifacts/models/babyllama_100m_2024_<folder_name>
 EOF
 }
 
@@ -77,7 +77,7 @@ for trial_dir in "${TRIAL_DIRS[@]}"; do
   index=$((index + 1))
   run_id="$(basename "$trial_dir")"
   train_file="$trial_dir/train_ready.jsonl"
-  model_dir="artifacts/models/babyllama_2024_${run_id}"
+  model_dir="artifacts/models/babyllama_100m_2024_${run_id}"
 
   if [[ ! -f "$train_file" ]]; then
     echo "[$index/$total] Skipping $run_id because train file is missing: $train_file"
