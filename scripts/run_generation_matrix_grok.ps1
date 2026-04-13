@@ -1,8 +1,8 @@
 param(
     [string[]]$Phenomena = @(),
     [int]$Count = 42,
-    [int]$RepeatsPerPhenomenon = 32,
-    [int]$DelaySeconds = 30,
+    [int]$RepeatsPerPhenomenon = 55,
+    [int]$DelaySeconds = 10,
     [string[]]$Prompts = @('prompt_3'),
     [string[]]$Providers = @('grok'),
     [string]$ConfigPath = 'data/topics/prompt_topic_config.json',
